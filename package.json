@@ -1,0 +1,13 @@
+{
+  "name": "tournament-hub",
+  "private": true,
+  "packageManager": "pnpm@10.11.1",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "turbo": "^2.9.9",
+    "typescript": "^5.8.3"
+  }
+}
