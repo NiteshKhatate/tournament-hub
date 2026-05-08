@@ -116,6 +116,40 @@ export const getAllOrganisers = async (): Promise<Organiser[]> => {
   }
 };
 
+export const getOrganisersPage = async (
+  page: number,
+  pageSize: number
+): Promise<{ organisers: Organiser[]; total: number }> => {
+  const client = getDbClient();
+  const offset = (page - 1) * pageSize;
+
+  try {
+    await client.connect();
+
+    const result = await client.query(
+      `SELECT o.*, l.username, COUNT(*) OVER() AS total_count
+       FROM organisers o
+       LEFT JOIN login l ON o.login_id = l.id
+       ORDER BY o.created DESC
+       LIMIT $1 OFFSET $2;`,
+      [pageSize, offset]
+    );
+
+    const organisers = result.rows.map((row) => {
+      const { total_count, ...organiser } = row;
+      return organiser as Organiser;
+    });
+
+    const total = result.rows[0]?.total_count ?? 0;
+    return { organisers, total };
+  } catch (error) {
+    console.error("Error fetching paginated organisers:", error);
+    throw error;
+  } finally {
+    await client.end();
+  }
+};
+
 /**
  * Get organiser by ID
  */

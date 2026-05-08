@@ -8,6 +8,7 @@ import {
   createOrganiser,
   getAllOrganisers,
   getOrganiserById,
+  getOrganisersPage,
   updateOrganiser,
   deleteOrganiser,
   getOrganiserByEmail,
@@ -135,16 +136,22 @@ app.post("/organisers", async (req, res) => {
   }
 });
 
-// Get all organisers
-app.get("/organisers", async (_req, res) => {
+// Get all organisers (supports pagination)
+app.get("/organisers", async (req, res) => {
   try {
-    const organisers = await getAllOrganisers();
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const pageSize = Math.max(Number(req.query.pageSize) || 10, 1);
+
+    const { organisers, total } = await getOrganisersPage(page, pageSize);
 
     res.json({
       success: true,
       message: "Organisers fetched successfully",
       data: organisers,
-      count: organisers.length,
+      page,
+      pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
     });
   } catch (err) {
     res.status(500).json({
