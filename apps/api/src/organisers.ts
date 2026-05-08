@@ -73,7 +73,7 @@ export const createOrganiser = async (
           organiserData.name,
           organiserData.email,
           organiserData.contact || null,
-          organiserData.sport || "general",
+          organiserData.sport ? organiserData.sport.toLowerCase() : "general",
         ]
       );
 
@@ -199,7 +199,11 @@ export const updateOrganiser = async (
 
     const values = Object.keys(updateData)
       .filter((key) => allowedFields.includes(key) && updateData[key as keyof OrganiserData] !== undefined)
-      .map((key) => updateData[key as keyof OrganiserData]);
+      .map((key) => {
+        const value = updateData[key as keyof OrganiserData];
+        // Convert sport to lowercase to match enum values
+        return key === "sport" && typeof value === "string" ? value.toLowerCase() : value;
+      });
 
     const query = `
       UPDATE organisers 

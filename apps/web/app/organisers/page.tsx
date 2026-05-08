@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import OrganisersTable from "../../components/OrganisersTable";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +28,30 @@ interface ApiResponse {
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:4000";
 const DEFAULT_PAGE_SIZE = 10;
+
+async function deleteOrganiser(id: string) {
+  "use server";
+
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "http://localhost:4000";
+
+  const response = await fetch(`${API_BASE}/organisers/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete organiser: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.message || "Failed to delete organiser");
+  }
+
+  // Redirect back to the current page to refresh data
+  redirect("/organisers");
+}
 
 async function fetchOrganisers(page: number, pageSize: number) {
   const url = `${API_BASE}/organisers?page=${page}&pageSize=${pageSize}`;
@@ -83,84 +109,28 @@ export default async function OrganisersPage({
                 Browse and manage tournament organisers. Use the pagination controls to navigate through the list.
               </p>
             </div>
-            <div className="rounded-2xl bg-zinc-100 dark:bg-zinc-950 p-4 text-sm text-zinc-700 dark:text-zinc-200">
-              Page {page} of {totalPages} · {total} organiser{total === 1 ? "" : "s"}
-            </div>
-          </div>
-
-          <div className="overflow-x-auto rounded-3xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-            <table className="min-w-full border-separate border-spacing-0 text-left text-sm text-zinc-700 dark:text-zinc-200">
-              <thead className="bg-zinc-50 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100">
-                <tr>
-                  <th className="px-6 py-4">Name</th>
-                  <th className="px-6 py-4">Email</th>
-                  <th className="px-6 py-4">Username</th>
-                  <th className="px-6 py-4">Contact</th>
-                  <th className="px-6 py-4">Sport</th>
-                  <th className="px-6 py-4">Created</th>
-                </tr>
-              </thead>
-              <tbody>
-                {organisers.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-zinc-500 dark:text-zinc-400">
-                      No organisers found.
-                    </td>
-                  </tr>
-                ) : (
-                  organisers.map((organiser) => (
-                    <tr
-                      key={organiser.id}
-                      className="border-t border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
-                    >
-                      <td className="px-6 py-4 font-medium text-zinc-900 dark:text-white">
-                        {organiser.name}
-                      </td>
-                      <td className="px-6 py-4">{organiser.email}</td>
-                      <td className="px-6 py-4">{organiser.username}</td>
-                      <td className="px-6 py-4">{organiser.contact || "—"}</td>
-                      <td className="px-6 py-4">{organiser.sport || "General"}</td>
-                      <td className="px-6 py-4">
-                        {organiser.created ? new Date(organiser.created).toLocaleDateString() : "—"}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col items-start gap-3 sm:items-end">
               <Link
-                href={`/organisers?page=${page - 1}&pageSize=${pageSize}`}
-                className={`rounded-xl border px-4 py-2 text-sm font-medium transition ${
-                  hasPrevious
-                    ? "border-zinc-300 bg-white text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
-                    : "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-700"
-                }`}
-                aria-disabled={!hasPrevious}
+                href="/organisers/new"
+                className="inline-flex rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500"
               >
-                Previous
+                Add organiser
               </Link>
-
-              <Link
-                href={`/organisers?page=${page + 1}&pageSize=${pageSize}`}
-                className={`rounded-xl border px-4 py-2 text-sm font-medium transition ${
-                  hasNext
-                    ? "border-zinc-300 bg-white text-zinc-900 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
-                    : "cursor-not-allowed border-zinc-200 bg-zinc-100 text-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-700"
-                }`}
-                aria-disabled={!hasNext}
-              >
-                Next
-              </Link>
-            </div>
-
-            <div className="text-sm text-zinc-500 dark:text-zinc-400">
-              Showing {organisers.length} of {total} organiser{total === 1 ? "" : "s"}.
+              <div className="rounded-2xl bg-zinc-100 dark:bg-zinc-950 p-4 text-sm text-zinc-700 dark:text-zinc-200">
+                Page {page} of {totalPages} · {total} organiser{total === 1 ? "" : "s"}
+              </div>
             </div>
           </div>
+
+          <OrganisersTable
+            organisers={organisers}
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            hasPrevious={hasPrevious}
+            hasNext={hasNext}
+            onDelete={deleteOrganiser}
+          />
         </div>
       </div>
     </div>
