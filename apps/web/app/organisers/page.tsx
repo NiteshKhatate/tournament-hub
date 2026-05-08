@@ -47,14 +47,15 @@ async function fetchOrganisers(page: number, pageSize: number) {
 export default async function OrganisersPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const pageParam = Array.isArray(searchParams?.page)
-    ? searchParams.page[0]
-    : searchParams?.page;
-  const pageSizeParam = Array.isArray(searchParams?.pageSize)
-    ? searchParams.pageSize[0]
-    : searchParams?.pageSize;
+  const params = await searchParams;
+  const pageParam = Array.isArray(params?.page)
+    ? params.page[0]
+    : params?.page;
+  const pageSizeParam = Array.isArray(params?.pageSize)
+    ? params.pageSize[0]
+    : params?.pageSize;
 
   const page = Math.max(Number(pageParam) || 1, 1);
   const pageSize = Math.max(Number(pageSizeParam) || DEFAULT_PAGE_SIZE, 1);
@@ -63,6 +64,8 @@ export default async function OrganisersPage({
     page,
     pageSize
   );
+
+  console.log(organisers);
 
   const hasPrevious = page > 1;
   const hasNext = page < totalPages;
