@@ -1,25 +1,45 @@
 'use client';
 
-import { useState, type FormEvent } from "react";
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 import { useRouter } from "next/navigation";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
+const validationSchema = Yup.object({
+  name: Yup.string().required('Name is required'),
+  email: Yup.string().email('Invalid email address').required('Email is required'),
+  username: Yup.string().required('Username is required'),
+  password: Yup.string().required('Password is required'),
+  contact: Yup.string()
+    .matches(/^\d{10}$/, 'Contact must be exactly 10 digits')
+    .required('Contact is required'),
+  sport: Yup.string().required('Sport is required'),
+});
+
+interface FormValues {
+  name: string;
+  email: string;
+  username: string;
+  password: string;
+  contact: string;
+  sport: string;
+}
+
 export default function NewOrganiserPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [contact, setContact] = useState("");
-  const [sport, setSport] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+  const initialValues: FormValues = {
+    name: '',
+    email: '',
+    username: '',
+    password: '',
+    contact: '',
+    sport: '',
+  };
+
+  const handleSubmit = async (values: FormValues, { setSubmitting, setStatus }: { setSubmitting: (isSubmitting: boolean) => void; setStatus: (status: string | null) => void }) => {
+    setStatus(null);
 
     try {
       const response = await fetch(`${API_BASE}/organisers`, {
@@ -28,12 +48,12 @@ export default function NewOrganiserPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name,
-          email,
-          username,
-          password,
-          contact: contact || undefined,
-          sport: sport || undefined,
+          name: values.name,
+          email: values.email,
+          username: values.username,
+          password: values.password,
+          contact: values.contact,
+          sport: values.sport,
         }),
       });
 
@@ -45,9 +65,9 @@ export default function NewOrganiserPage() {
 
       router.push("/organisers");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unexpected error");
+      setStatus(err instanceof Error ? err.message : "Unexpected error");
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
@@ -64,91 +84,131 @@ export default function NewOrganiserPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <label className="block">
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Name</span>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  required
-                  className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
-                />
-              </label>
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ isSubmitting, status }) => (
+              <Form className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="block">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      Name
+                    </label>
+                    <Field
+                      name="name"
+                      type="text"
+                      className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                    />
+                    <ErrorMessage
+                      name="name"
+                      component="div"
+                      className="mt-1 text-sm text-red-600 dark:text-red-400"
+                    />
+                  </div>
 
-              <label className="block">
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Email</span>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  required
-                  className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
-                />
-              </label>
+                  <div className="block">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      Email
+                    </label>
+                    <Field
+                      name="email"
+                      type="email"
+                      className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                    />
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="mt-1 text-sm text-red-600 dark:text-red-400"
+                    />
+                  </div>
 
-              <label className="block">
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Username</span>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(event) => setUsername(event.target.value)}
-                  required
-                  className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
-                />
-              </label>
+                  <div className="block">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      Username
+                    </label>
+                    <Field
+                      name="username"
+                      type="text"
+                      className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                    />
+                    <ErrorMessage
+                      name="username"
+                      component="div"
+                      className="mt-1 text-sm text-red-600 dark:text-red-400"
+                    />
+                  </div>
 
-              <label className="block">
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Password</span>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  required
-                  className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
-                />
-              </label>
-            </div>
+                  <div className="block">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      Password
+                    </label>
+                    <Field
+                      name="password"
+                      type="password"
+                      className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                    />
+                    <ErrorMessage
+                      name="password"
+                      component="div"
+                      className="mt-1 text-sm text-red-600 dark:text-red-400"
+                    />
+                  </div>
+                </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <label className="block">
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Contact</span>
-                <input
-                  type="text"
-                  value={contact}
-                  onChange={(event) => setContact(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
-                />
-              </label>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="block">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      Contact
+                    </label>
+                    <Field
+                      name="contact"
+                      type="text"
+                      className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                    />
+                    <ErrorMessage
+                      name="contact"
+                      component="div"
+                      className="mt-1 text-sm text-red-600 dark:text-red-400"
+                    />
+                  </div>
 
-              <label className="block">
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Sport</span>
-                <input
-                  type="text"
-                  value={sport}
-                  onChange={(event) => setSport(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
-                />
-              </label>
-            </div>
+                  <div className="block">
+                    <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                      Sport
+                    </label>
+                    <Field
+                      name="sport"
+                      type="text"
+                      className="mt-2 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:border-zinc-700 dark:bg-zinc-950 dark:text-white"
+                    />
+                    <ErrorMessage
+                      name="sport"
+                      component="div"
+                      className="mt-1 text-sm text-red-600 dark:text-red-400"
+                    />
+                  </div>
+                </div>
 
-            {error ? (
-              <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-                {error}
-              </div>
-            ) : null}
+                {status ? (
+                  <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+                    {status}
+                  </div>
+                ) : null}
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-zinc-300"
-              >
-                {isSubmitting ? "Saving…" : "Create organiser"}
-              </button>
-            </div>
-          </form>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-zinc-300"
+                  >
+                    {isSubmitting ? "Saving…" : "Create organiser"}
+                  </button>
+                </div>
+              </Form>
+            )}
+          </Formik>
         </div>
       </div>
     </div>
