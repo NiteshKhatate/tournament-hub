@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { encryptPassword } from '@/lib/auth-utils'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -14,7 +14,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    let supabase
+    try {
+      supabase = createAdminClient()
+    } catch {
+      return NextResponse.json(
+        {
+          error:
+            'Server database configuration is incomplete. Add SUPABASE_SECRET_KEY (sb_secret_...) or SUPABASE_SERVICE_ROLE_KEY to .env.local from Supabase Dashboard → Settings → API Keys.',
+        },
+        { status: 500 }
+      )
+    }
     const encryptionSalt = process.env.ENCRYPTION_SALT
 
     if (!encryptionSalt) {
@@ -57,7 +68,7 @@ export async function POST(request: NextRequest) {
           email,
           contact: Number(contact),
           login_id: loginId,
-          status: 'Active',
+          status: 'active',
         },
       ])
       .select()

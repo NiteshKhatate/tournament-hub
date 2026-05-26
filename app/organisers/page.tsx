@@ -1,14 +1,14 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
+import DeleteOrganiserButton from './DeleteOrganiserButton'
 
 export default async function OrganisersPage() {
-  const supabase = await createClient()
-  
   let organisers: any[] = []
   let error = null
   let errorMessage = ''
 
   try {
+    const supabase = createAdminClient()
     const { data, error: fetchError } = await supabase
       .from('organisers')
       .select('*')
@@ -19,9 +19,10 @@ export default async function OrganisersPage() {
       throw fetchError
     }
     organisers = data || []
-  } catch (err: any) {
+  } catch (err: unknown) {
     error = err
-    errorMessage = err?.message || 'Unknown error'
+    errorMessage =
+      err instanceof Error ? err.message : 'Unknown error'
     console.error('Error fetching organisers:', err)
   }
 
@@ -91,7 +92,7 @@ export default async function OrganisersPage() {
                       <td className="px-6 py-4 text-sm">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            organiser.status === 'Active'
+                            organiser.status === 'active'
                               ? 'bg-green-100 text-green-800'
                               : 'bg-slate-100 text-slate-800'
                           }`}
@@ -100,12 +101,16 @@ export default async function OrganisersPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <button className="text-blue-600 hover:text-blue-700 font-medium mr-4">
+                        <Link
+                          href={`/organisers/new?id=${organiser.id}`}
+                          className="text-blue-600 hover:text-blue-700 font-medium mr-4"
+                        >
                           Edit
-                        </button>
-                        <button className="text-red-600 hover:text-red-700 font-medium">
-                          Delete
-                        </button>
+                        </Link>
+                        <DeleteOrganiserButton
+                          id={organiser.id}
+                          name={organiser.name}
+                        />
                       </td>
                     </tr>
                   ))}
