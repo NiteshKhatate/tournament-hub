@@ -75,17 +75,15 @@ export default function CreateOrganiserPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/organisers', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          contact: Number(formData.contact),
           username: formData.username,
-          password: formData.password,
+          role: 'organiser',
+          password: Buffer.from(formData.password).toString("base64"),
         }),
       })
 
@@ -96,8 +94,26 @@ export default function CreateOrganiserPage() {
         return
       }
 
-      setSuccess(true)
+      try {
+        await fetch('/api/organisers', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            contact: formData.contact,
+            login_id: data.loginId,
+          }),
+        })
+
+        setSuccess(true)
       setFormData({ name: '', email: '', contact: '', username: '', password: '', confirmPassword: '' })
+      } catch (err) {
+        setError('Organiser created but failed to save details')
+        return
+      }
 
       // Redirect to organisers page after 2 seconds
       setTimeout(() => {
