@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "env": [
+    {
+      "key": "NEXT_PUBLIC_SUPABASE_URL",
+      "value": "@NEXT_PUBLIC_SUPABASE_URL"
+    },
+    {
+      "key": "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+      "value": "@NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
+    }
+  ],
+  "functions": {
+    "app/api/**": {
+      "maxDuration": 60
+    }
+  }
+}
