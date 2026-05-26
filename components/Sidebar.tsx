@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 const navigationItems = [
   { name: 'Dashboard', href: '/dashboard', icon: '📊' },
+  { name: 'Organisers', href: '/organisers', icon: '👔' },
   { name: 'Tournaments', href: '/tournaments', icon: '🏆' },
   { name: 'Teams', href: '/teams', icon: '👥' },
   { name: 'Players', href: '/players', icon: '👤' },

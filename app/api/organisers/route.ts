@@ -1,0 +1,88 @@
+import { createClient } from '@/lib/supabase-server'
+import { encryptPassword } from '@/lib/auth-utils'
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { name, email, password, username, contact } = body
+
+    if (!name || !email || !password || !username || !contact) {
+      return NextResponse.json(
+        { error: 'Name, email, username, contact, and password are required' },
+        { status: 400 }
+      )
+    }
+
+    const supabase = await createClient()
+    const encryptionSalt = process.env.ENCRYPTION_SALT
+
+    if (!encryptionSalt) {
+      return NextResponse.json(
+        { error: 'Encryption salt not configured' },
+        { status: 500 }
+      )
+    }
+
+    // Encrypt password
+    const encryptedPassword = encryptPassword(password, encryptionSalt)
+
+    // Create login record first (login.username is required)
+    const { data: loginData, error: loginError } = await supabase
+      .from('login')
+      .insert([
+        {
+          username,
+          password: encryptedPassword,
+          role: 'organiser',
+        },
+      ])
+      .select()
+
+    if (loginError) {
+      return NextResponse.json(
+        { error: `Failed to create login: ${loginError.message}` },
+        { status: 400 }
+      )
+    }
+
+    const loginId = loginData?.[0]?.id
+
+    // Create organiser record (include contact)
+    const { data: organiserData, error: organiserError } = await supabase
+      .from('organisers')
+      .insert([
+        {
+          name,
+          email,
+          contact: Number(contact),
+          login_id: loginId,
+          status: 'Active',
+        },
+      ])
+      .select()
+
+    if (organiserError) {
+      // Rollback login record if organiser creation fails
+      await supabase.from('login').delete().eq('id', loginId)
+      return NextResponse.json(
+        { error: `Failed to create organiser: ${organiserError.message}` },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json(
+      {
+        message: 'Organiser created successfully',
+        organiser: organiserData?.[0],
+      },
+      { status: 201 }
+    )
+  } catch (error: any) {
+    console.error('Error creating organiser:', error)
+    return NextResponse.json(
+      { error: error.message || 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
