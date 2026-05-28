@@ -15,17 +15,17 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 w-full">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200">
-        <div className="ml-64 px-8 py-6">
+        <div className="px-8 py-6">
           <h1 className="text-4xl font-bold text-slate-900">Dashboard</h1>
           <p className="text-slate-600 mt-1">Welcome back! Here's your tournament overview.</p>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="ml-64 p-8">
+      <main className="p-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
