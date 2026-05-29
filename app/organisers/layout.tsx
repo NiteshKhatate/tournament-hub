@@ -1,6 +1,6 @@
 import Sidebar from "@/components/Sidebar";
 
-export default function DashboardLayout({
+export default function OrganisersLayout({
   children,
 }: {
   children: React.ReactNode
