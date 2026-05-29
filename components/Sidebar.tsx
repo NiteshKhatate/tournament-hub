@@ -49,6 +49,8 @@ export default function Sidebar() {
   // Filter navigation items based on user role
   const filteredNavigationItems = navigationItems.filter((item) => {
     if (!item.requireRole) return true
+    // super_admin can see all items
+    if (user?.role === 'super_admin') return true
     return user?.role === item.requireRole
   })
 

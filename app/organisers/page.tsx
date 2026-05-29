@@ -37,8 +37,7 @@ export default async function OrganisersPage() {
       </header>
 
       {/* Main Content */}
-      <main className="ml-64 p-8">
-        {/* Error Message */}
+      <main className="p-8">
         {error && (
           <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg border border-red-300">
             <p className="font-semibold">Error loading organisers:</p>
