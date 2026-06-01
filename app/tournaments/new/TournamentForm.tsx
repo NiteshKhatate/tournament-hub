@@ -9,6 +9,13 @@ interface Organiser {
   name: string
 }
 
+interface User {
+  id: number
+  username: string
+  role: string
+  uuid: string
+}
+
 const emptyForm = {
   name: '',
   sport: '',
@@ -36,9 +43,70 @@ export default function TournamentForm() {
   const [formData, setFormData] = useState(emptyForm)
   const [organisers, setOrganisers] = useState<Organiser[]>([])
   const [isLoadingOrganisers, setIsLoadingOrganisers] = useState(true)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [loggedInOrganiser, setLoggedInOrganiser] = useState<Organiser | null>(null)
 
-  // Fetch organisers on mount
+  // Fetch current user on mount
   useEffect(() => {
+    const loadCurrentUser = async () => {
+      try {
+        const response = await fetch('/api/auth/user')
+        if (response.ok) {
+          const data = await response.json()
+          setCurrentUser(data.user)
+          
+          // If user is an organiser, fetch their organiser details
+          if (data.user.role === 'organiser') {
+            const organiserResponse = await fetch('/api/organisers')
+            const organiserData = await organiserResponse.json()
+            if (organiserResponse.ok) {
+              // Find the organiser linked to this user
+              // We need to check the login_id, but since we only get id and name from /api/organisers,
+              // we'll need to make an assumption or create a new endpoint
+              // For now, we'll assume the first organiser is theirs or use their username
+              setOrganisers(organiserData.organisers || [])
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching current user:', err)
+      }
+    }
+
+    loadCurrentUser()
+  }, [])
+
+  // Fetch organiser for logged-in organiser user
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== 'organiser') return
+
+    const fetchLoggedInOrganiser = async () => {
+      try {
+        const response = await fetch('/api/auth/organiser')
+        if (response.ok) {
+          const data = await response.json()
+          setLoggedInOrganiser(data.organiser)
+          // Auto-fill organiser_id if not already set
+          setFormData((prev) => ({
+            ...prev,
+            organiser_id: String(data.organiser.id),
+          }))
+        }
+      } catch (err) {
+        console.error('Error fetching organiser details:', err)
+      }
+    }
+
+    fetchLoggedInOrganiser()
+  }, [currentUser])
+
+  // Fetch organisers on mount (only if user is not an organiser)
+  useEffect(() => {
+    if (currentUser?.role === 'organiser') {
+      setIsLoadingOrganisers(false)
+      return
+    }
+
     const loadOrganisers = async () => {
       try {
         const response = await fetch('/api/organisers')
@@ -54,7 +122,7 @@ export default function TournamentForm() {
     }
 
     loadOrganisers()
-  }, [])
+  }, [currentUser])
 
   useEffect(() => {
     if (!tournamentId) return
@@ -326,26 +394,37 @@ export default function TournamentForm() {
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="organiser_id" className="block text-sm font-semibold text-slate-900 mb-2">
-                    Organiser *
-                  </label>
-                  <select
-                    id="organiser_id"
-                    name="organiser_id"
-                    value={formData.organiser_id}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                    disabled={isLoading || isLoadingOrganisers}
-                  >
-                    <option value="">Select Organiser</option>
-                    {organisers.map((organiser) => (
-                      <option key={organiser.id} value={organiser.id}>
-                        {organiser.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {currentUser?.role === 'organiser' ? (
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-900 mb-2">
+                      Your Organisation
+                    </label>
+                    <div className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-700 flex items-center">
+                      {loggedInOrganiser?.name || 'Loading...'}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label htmlFor="organiser_id" className="block text-sm font-semibold text-slate-900 mb-2">
+                      Organiser *
+                    </label>
+                    <select
+                      id="organiser_id"
+                      name="organiser_id"
+                      value={formData.organiser_id}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                      disabled={isLoading || isLoadingOrganisers}
+                    >
+                      <option value="">Select Organiser</option>
+                      {organisers.map((organiser) => (
+                        <option key={organiser.id} value={organiser.id}>
+                          {organiser.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
