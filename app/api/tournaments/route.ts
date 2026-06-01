@@ -5,6 +5,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
+    const organiserId = searchParams.get('organiser_id')
 
     const supabase = createAdminClient()
 
@@ -20,6 +21,21 @@ export async function GET(request: Request) {
       }
 
       return Response.json({ tournament: data }, { status: 200 })
+    }
+
+    // If organiser_id is provided, filter by organiser_id
+    if (organiserId) {
+      const { data, error } = await supabase
+        .from('tournaments')
+        .select('*')
+        .eq('organiser_id', Number(organiserId))
+        .order('created', { ascending: false })
+
+      if (error) {
+        return Response.json({ error: error.message }, { status: 500 })
+      }
+
+      return Response.json({ tournaments: data }, { status: 200 })
     }
 
     const { data, error } = await supabase
