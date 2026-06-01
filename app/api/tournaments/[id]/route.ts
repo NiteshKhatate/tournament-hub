@@ -3,10 +3,10 @@ import { createAdminClient } from '@/lib/supabase-admin'
 // GET a specific tournament
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id
+    const { id } = await params
     const supabase = createAdminClient()
 
     const { data, error } = await supabase
@@ -32,10 +32,10 @@ export async function GET(
 // PATCH - Update a tournament
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id
+    const { id } = await params
     const body = await request.json()
     const { name, sport, start_date, end_date, player_limit, player_criteria, organiser_id, status } = body
 
@@ -75,10 +75,10 @@ export async function PATCH(
 // DELETE - Delete a tournament
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id
+    const { id } = await params
     const supabase = createAdminClient()
 
     // First, check if tournament exists
