@@ -60,10 +60,6 @@ export default function TournamentForm() {
             const organiserResponse = await fetch('/api/organisers')
             const organiserData = await organiserResponse.json()
             if (organiserResponse.ok) {
-              // Find the organiser linked to this user
-              // We need to check the login_id, but since we only get id and name from /api/organisers,
-              // we'll need to make an assumption or create a new endpoint
-              // For now, we'll assume the first organiser is theirs or use their username
               setOrganisers(organiserData.organisers || [])
             }
           }

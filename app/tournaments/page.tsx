@@ -1,24 +1,76 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { cookies } from 'next/headers'
 import DeleteTournamentButton from './DeleteTournamentButton'
 
 export default async function TournamentsPage() {
   let tournaments: any[] = []
   let error = null
   let errorMessage = ''
+  let isOrganiser = false
+  let organiserName = ''
 
   try {
     const supabase = createAdminClient()
-    const { data, error: fetchError } = await supabase
-      .from('tournaments')
-      .select('*, organisers(name)')
-      .order('created', { ascending: false })
+    const cookieStore = await cookies()
+    const authToken = cookieStore.get('auth_token')
 
-    if (fetchError) {
-      errorMessage = fetchError.message
-      throw fetchError
+    // Check if user is authenticated and is an organiser
+    if (authToken && authToken.value) {
+      const user = JSON.parse(authToken.value)
+      
+      if (user.role === 'organiser') {
+        isOrganiser = true
+        
+        // Get the organiser details for this user
+        const { data: organiserData, error: organiserError } = await supabase
+          .from('organisers')
+          .select('id, name')
+          .eq('login_id', user.id)
+          .single()
+
+        if (!organiserError && organiserData) {
+          organiserName = organiserData.name
+          
+          // Fetch only tournaments for this organiser
+          const { data, error: fetchError } = await supabase
+            .from('tournaments')
+            .select('*, organisers(name)')
+            .eq('organiser_id', organiserData.id)
+            .order('created', { ascending: false })
+
+          if (fetchError) {
+            errorMessage = fetchError.message
+            throw fetchError
+          }
+          tournaments = data || []
+        }
+      } else {
+        // Non-organiser users see all tournaments
+        const { data, error: fetchError } = await supabase
+          .from('tournaments')
+          .select('*, organisers(name)')
+          .order('created', { ascending: false })
+
+        if (fetchError) {
+          errorMessage = fetchError.message
+          throw fetchError
+        }
+        tournaments = data || []
+      }
+    } else {
+      // No user logged in, show all tournaments
+      const { data, error: fetchError } = await supabase
+        .from('tournaments')
+        .select('*, organisers(name)')
+        .order('created', { ascending: false })
+
+      if (fetchError) {
+        errorMessage = fetchError.message
+        throw fetchError
+      }
+      tournaments = data || []
     }
-    tournaments = data || []
   } catch (err: unknown) {
     error = err
     errorMessage =
@@ -32,7 +84,11 @@ export default async function TournamentsPage() {
       <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="px-8 py-6">
           <h1 className="text-4xl font-bold text-slate-900">Tournaments</h1>
-          <p className="text-slate-600 mt-1">Manage all tournaments and events.</p>
+          <p className="text-slate-600 mt-1">
+            {isOrganiser 
+              ? `Tournaments organized by ${organiserName}` 
+              : 'Manage all tournaments and events.'}
+          </p>
         </div>
       </header>
 

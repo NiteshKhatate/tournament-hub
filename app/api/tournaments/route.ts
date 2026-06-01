@@ -1,5 +1,4 @@
 import { createAdminClient } from '@/lib/supabase-admin'
-import { cookies } from 'next/headers'
 
 // GET all tournaments or GET a specific tournament
 export async function GET(request: Request) {
@@ -56,28 +55,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get login_id from auth token
-    const cookieStore = await cookies()
-    const authToken = cookieStore.get('auth_token')?.value
-    
-    if (!authToken) {
-      return Response.json(
-        { error: 'Unauthorized - must be logged in' },
-        { status: 401 }
-      )
-    }
-
-    let loginId: number
-    try {
-      const user = JSON.parse(authToken)
-      loginId = user.id
-    } catch {
-      return Response.json(
-        { error: 'Invalid authentication token' },
-        { status: 401 }
-      )
-    }
-
     const supabase = createAdminClient()
 
     const { data, error } = await supabase
@@ -91,7 +68,6 @@ export async function POST(request: Request) {
           player_criteria,
           player_limit: Number(player_limit),
           organiser_id: Number(organiser_id),
-          login_id: loginId,
           status: status || 'active',
         },
       ])
