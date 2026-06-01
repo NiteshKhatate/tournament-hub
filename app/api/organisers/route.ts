@@ -2,6 +2,35 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { encryptPassword } from '@/lib/auth-utils'
 import { NextRequest, NextResponse } from 'next/server'
 
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = createAdminClient()
+
+    const { data, error } = await supabase
+      .from('organisers')
+      .select('id, name')
+      .order('name', { ascending: true })
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json(
+      { organisers: data },
+      { status: 200 }
+    )
+  } catch (error: any) {
+    console.error('Error fetching organisers:', error)
+    return NextResponse.json(
+      { error: error.message || 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
