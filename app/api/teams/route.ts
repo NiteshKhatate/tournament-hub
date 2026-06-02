@@ -4,12 +4,25 @@ import { cookies } from 'next/headers'
 // GET all teams
 export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const tournamentIds = searchParams.get('tournament_ids')
+
     const supabase = createAdminClient()
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('teams')
       .select('*')
       .order('created', { ascending: false })
+
+    // If tournament_ids is provided, filter by multiple tournament IDs
+    if (tournamentIds) {
+      const ids = tournamentIds.split(',').map(id => Number(id.trim())).filter(id => !isNaN(id))
+      if (ids.length > 0) {
+        query = query.in('tournament_id', ids)
+      }
+    }
+
+    const { data, error } = await query
 
     if (error) {
       return Response.json({ error: error.message }, { status: 500 })
