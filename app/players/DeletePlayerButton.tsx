@@ -10,10 +10,12 @@ interface DeletePlayerButtonProps {
 
 export default function DeletePlayerButton({ id, name }: DeletePlayerButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
   const router = useRouter()
 
   const handleDelete = async () => {
+    const confirmed = window.confirm(`Are you sure you want to delete player "${name}"?`)
+    if (!confirmed) return
+
     setIsDeleting(true)
     try {
       const response = await fetch(`/api/players?id=${id}`, {
@@ -24,9 +26,9 @@ export default function DeletePlayerButton({ id, name }: DeletePlayerButtonProps
         throw new Error('Failed to delete player')
       }
 
+      alert(`Player "${name}" deleted successfully!`)
       // Refresh the page
       router.refresh()
-      setShowConfirm(false)
     } catch (error) {
       console.error('Error deleting player:', error)
       alert('Failed to delete player. Please try again.')
@@ -35,34 +37,13 @@ export default function DeletePlayerButton({ id, name }: DeletePlayerButtonProps
     }
   }
 
-  if (showConfirm) {
-    return (
-      <div className="inline-block">
-        <span className="text-red-600 text-sm font-medium mr-2">Are you sure?</span>
-        <button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="inline-block text-red-600 hover:text-red-700 font-medium mr-2 disabled:opacity-50"
-        >
-          {isDeleting ? 'Deleting...' : 'Yes, Delete'}
-        </button>
-        <button
-          onClick={() => setShowConfirm(false)}
-          disabled={isDeleting}
-          className="inline-block text-gray-600 hover:text-gray-700 font-medium disabled:opacity-50"
-        >
-          Cancel
-        </button>
-      </div>
-    )
-  }
-
   return (
     <button
-      onClick={() => setShowConfirm(true)}
-      className="text-red-600 hover:text-red-700 font-medium"
+      onClick={handleDelete}
+      disabled={isDeleting}
+      className="text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
     >
-      Delete
+      {isDeleting ? 'Deleting...' : 'Delete'}
     </button>
   )
 }
