@@ -55,6 +55,7 @@ export default function PlayerForm() {
   const [isLoadingTeams, setIsLoadingTeams] = useState(true)
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [organiserData, setOrganiserData] = useState<{ id: number; name: string } | null>(null)
+  const [teamData, setTeamData] = useState<{ id: number; name: string } | null>(null)
 
   // Fetch current user on mount
   useEffect(() => {
@@ -92,8 +93,38 @@ export default function PlayerForm() {
     fetchOrganiserData()
   }, [currentUser])
 
+  // Fetch team data if user is a team admin
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== 'team_admin') return
+
+    const fetchTeamData = async () => {
+      try {
+        const response = await fetch('/api/auth/team')
+        if (response.ok) {
+          const data = await response.json()
+          setTeamData(data.team)
+          setTeams([data.team])
+          if (!isEditMode) {
+            setFormData((prev) => ({
+              ...prev,
+              team_id: String(data.team.id),
+            }))
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching team data:', err)
+      } finally {
+        setIsLoadingTeams(false)
+      }
+    }
+
+    fetchTeamData()
+  }, [currentUser, isEditMode])
+
   // Fetch teams on mount or when user/organiser data changes
   useEffect(() => {
+    if (currentUser?.role === 'team_admin') return
+
     const loadTeams = async () => {
       try {
         let url = '/api/teams'
@@ -317,21 +348,30 @@ export default function PlayerForm() {
                 <label htmlFor="team_id" className="block text-sm font-semibold text-slate-900 mb-2">
                   Team *
                 </label>
-                <select
-                  id="team_id"
-                  name="team_id"
-                  value={formData.team_id}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                  disabled={isLoading || isLoadingTeams}
-                >
-                  <option value="">Select Team</option>
-                  {teams.map((team) => (
-                    <option key={team.id} value={team.id}>
-                      {team.name}
-                    </option>
-                  ))}
-                </select>
+                {currentUser?.role === 'team_admin' && teamData ? (
+                  <input
+                    type="text"
+                    value={teamData.name}
+                    readOnly
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-700 outline-none"
+                  />
+                ) : (
+                  <select
+                    id="team_id"
+                    name="team_id"
+                    value={formData.team_id}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                    disabled={isLoading || isLoadingTeams}
+                  >
+                    <option value="">Select Team</option>
+                    {teams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

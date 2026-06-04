@@ -46,8 +46,13 @@ export default function Sidebar() {
     fetchUser()
   }, [])
 
+  const hiddenForTeamAdmin = ['/organisers', '/teams']
+
   // Filter navigation items based on user role
   const filteredNavigationItems = navigationItems.filter((item) => {
+    if (user?.role === 'team_admin' && hiddenForTeamAdmin.includes(item.href)) {
+      return false
+    }
     if (!item.requireRole) return true
     // super_admin can see all items
     if (user?.role === 'super_admin') return true

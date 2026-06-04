@@ -1,4 +1,9 @@
 import { createAdminClient } from '@/lib/supabase-admin'
+import { getAuthUser } from '@/lib/auth-session'
+import {
+  assertPlayerBelongsToTeamAdmin,
+  assertTeamIdAllowedForTeamAdmin,
+} from '@/lib/player-auth'
 
 type RouteContext = { params: Promise<{ id: string }> }
 
@@ -21,6 +26,14 @@ export async function GET(
       return Response.json({ error: 'Player not found' }, { status: 404 })
     }
 
+    const user = await getAuthUser()
+    if (user?.role === 'team_admin') {
+      const access = await assertPlayerBelongsToTeamAdmin(Number(id))
+      if (!access.ok) {
+        return Response.json({ error: access.error }, { status: access.status })
+      }
+    }
+
     return Response.json({ player: data }, { status: 200 })
   } catch (error) {
     console.error('Player GET error:', error)
@@ -41,9 +54,23 @@ export async function PATCH(
     const body = await request.json()
     const { name, id_proof, id_type, weight, height, team_id, status } = body
 
+    const user = await getAuthUser()
+    if (user?.role === 'team_admin') {
+      const access = await assertPlayerBelongsToTeamAdmin(Number(id))
+      if (!access.ok) {
+        return Response.json({ error: access.error }, { status: access.status })
+      }
+      if (team_id !== undefined) {
+        const teamAccess = await assertTeamIdAllowedForTeamAdmin(Number(team_id))
+        if (!teamAccess.ok) {
+          return Response.json({ error: teamAccess.error }, { status: teamAccess.status })
+        }
+      }
+    }
+
     const supabase = createAdminClient()
 
-    const updateData: any = {}
+    const updateData: Record<string, unknown> = {}
     if (name !== undefined) updateData.name = name
     if (id_proof !== undefined) updateData.id_proof = id_proof
     if (id_type !== undefined) updateData.id_type = id_type
@@ -91,6 +118,14 @@ export async function DELETE(
 
     if (fetchError || !player) {
       return Response.json({ error: 'Player not found' }, { status: 404 })
+    }
+
+    const user = await getAuthUser()
+    if (user?.role === 'team_admin') {
+      const access = await assertPlayerBelongsToTeamAdmin(Number(id))
+      if (!access.ok) {
+        return Response.json({ error: access.error }, { status: access.status })
+      }
     }
 
     // Delete the player
