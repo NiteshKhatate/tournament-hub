@@ -33,6 +33,9 @@ const emptyForm = {
   tournament_id: '',
   status: 'active',
   disqualified_reason: '',
+  username: '',
+  password: '',
+  confirmPassword: '',
 }
 
 const statusOptions = ['active', 'eliminated', 'disqualified']
@@ -140,6 +143,9 @@ export default function TeamForm() {
           tournament_id: String(team.tournament_id ?? ''),
           status: team.status ?? 'active',
           disqualified_reason: team.disqualified_reason ?? '',
+          username: team.username ?? '',
+          password: '',
+          confirmPassword: '',
         })
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Failed to load team')
@@ -195,6 +201,38 @@ export default function TeamForm() {
       return
     }
 
+    if (!formData.username.trim()) {
+      setError('Username is required')
+      return
+    }
+
+    if (!isEditMode) {
+      if (!formData.password) {
+        setError('Password is required')
+        return
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match')
+        return
+      }
+
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters')
+        return
+      }
+    } else if (formData.password || formData.confirmPassword) {
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match')
+        return
+      }
+
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters')
+        return
+      }
+    }
+
     setIsLoading(true)
 
     try {
@@ -205,6 +243,8 @@ export default function TeamForm() {
         tournament_id: Number(formData.tournament_id),
         status: formData.status,
         disqualified_reason: formData.disqualified_reason || null,
+        username: formData.username,
+        ...(formData.password ? { password: formData.password } : {}),
       }
 
       const response = await fetch(
@@ -214,7 +254,9 @@ export default function TeamForm() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(
+            isEditMode ? payload : { ...payload, password: formData.password }
+          ),
         }
       )
 
@@ -401,6 +443,55 @@ export default function TeamForm() {
                   />
                 </div>
               )}
+
+              <div>
+                <label htmlFor="username" className="block text-sm font-semibold text-slate-900 mb-2">
+                  Username *
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="team_admin_username"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-semibold text-slate-900 mb-2">
+                  Password {isEditMode ? '(leave blank to keep current)' : '*'}
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  disabled={isLoading}
+                />
+                <p className="text-xs text-slate-600 mt-1">Minimum 6 characters</p>
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-semibold text-slate-900 mb-2">
+                  Confirm Password {isEditMode ? '' : '*'}
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                  disabled={isLoading}
+                />
+              </div>
 
               <div className="flex gap-4 pt-6">
                 <button

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { cookies } from 'next/headers'
+import { getAuthUser, getTeamByLoginId } from '@/lib/auth-session'
 import DeletePlayerButton from './DeletePlayerButton'
 
 export default async function PlayersPage() {
@@ -9,17 +9,35 @@ export default async function PlayersPage() {
   let errorMessage = ''
   let isOrganiser = false
   let organiserName = ''
+  let isTeamAdmin = false
+  let teamName = ''
 
   try {
     const supabase = createAdminClient()
-    const cookieStore = await cookies()
-    const authToken = cookieStore.get('auth_token')
+    const user = await getAuthUser()
 
-    // Check if user is authenticated and is an organiser
-    if (authToken && authToken.value) {
-      const user = JSON.parse(authToken.value)
-      
-      if (user.role === 'organiser') {
+    if (user) {
+      if (user.role === 'team_admin') {
+        isTeamAdmin = true
+
+        const { data: teamData, error: teamError } = await getTeamByLoginId(user.id)
+
+        if (!teamError && teamData) {
+          teamName = teamData.name
+
+          const { data, error: fetchError } = await supabase
+            .from('players')
+            .select('*, teams(name, tournaments(name))')
+            .eq('team_id', teamData.id)
+            .order('created', { ascending: false })
+
+          if (fetchError) {
+            errorMessage = fetchError.message
+            throw fetchError
+          }
+          players = data || []
+        }
+      } else if (user.role === 'organiser') {
         isOrganiser = true
         
         // Get the organiser details for this user
@@ -105,9 +123,11 @@ export default async function PlayersPage() {
         <div className="px-8 py-6">
           <h1 className="text-4xl font-bold text-slate-900">Players</h1>
           <p className="text-slate-600 mt-1">
-            {isOrganiser 
-              ? `Players from teams affiliated with tournaments organized by ${organiserName}` 
-              : 'Manage all players across tournaments.'}
+            {isTeamAdmin
+              ? `Players for team ${teamName}`
+              : isOrganiser
+                ? `Players from teams affiliated with tournaments organized by ${organiserName}`
+                : 'Manage all players across tournaments.'}
           </p>
         </div>
       </header>

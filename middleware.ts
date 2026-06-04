@@ -16,6 +16,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  if (authToken) {
+    try {
+      const user = JSON.parse(authToken)
+      if (user.role === 'team_admin') {
+        const blockedPrefixes = ['/organisers', '/teams']
+        if (
+          blockedPrefixes.some((route) =>
+            request.nextUrl.pathname.startsWith(route)
+          )
+        ) {
+          return NextResponse.redirect(new URL('/dashboard', request.url))
+        }
+      }
+    } catch {
+      // ignore invalid token; protected routes still require valid session elsewhere
+    }
+  }
+
   // If user is logged in and tries to access login page, redirect to dashboard
   if (request.nextUrl.pathname === '/login' && authToken) {
     return NextResponse.redirect(new URL('/dashboard', request.url))

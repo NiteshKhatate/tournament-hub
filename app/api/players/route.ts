@@ -1,4 +1,10 @@
 import { createAdminClient } from '@/lib/supabase-admin'
+import { getAuthUser } from '@/lib/auth-session'
+import {
+  assertPlayerBelongsToTeamAdmin,
+  assertTeamIdAllowedForTeamAdmin,
+  getTeamAdminTeamId,
+} from '@/lib/player-auth'
 
 // GET all players or GET a specific player
 export async function GET(request: Request) {
@@ -10,6 +16,14 @@ export async function GET(request: Request) {
     const supabase = createAdminClient()
 
     if (id) {
+      const user = await getAuthUser()
+      if (user?.role === 'team_admin') {
+        const access = await assertPlayerBelongsToTeamAdmin(Number(id))
+        if (!access.ok) {
+          return Response.json({ error: access.error }, { status: access.status })
+        }
+      }
+
       const { data, error } = await supabase
         .from('players')
         .select('*')
@@ -21,6 +35,24 @@ export async function GET(request: Request) {
       }
 
       return Response.json({ player: data }, { status: 200 })
+    }
+
+    const user = await getAuthUser()
+    const teamAdminTeamId =
+      user?.role === 'team_admin' ? await getTeamAdminTeamId() : null
+
+    if (teamAdminTeamId) {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*, teams(name, tournaments(name))')
+        .eq('team_id', teamAdminTeamId)
+        .order('created', { ascending: false })
+
+      if (error) {
+        return Response.json({ error: error.message }, { status: 500 })
+      }
+
+      return Response.json({ players: data }, { status: 200 })
     }
 
     // If team_id is provided, filter by team_id
@@ -71,6 +103,15 @@ export async function POST(request: Request) {
       )
     }
 
+    const teamIdNum = Number(team_id)
+    const user = await getAuthUser()
+    if (user?.role === 'team_admin') {
+      const access = await assertTeamIdAllowedForTeamAdmin(teamIdNum)
+      if (!access.ok) {
+        return Response.json({ error: access.error }, { status: access.status })
+      }
+    }
+
     const supabase = createAdminClient()
 
     const { data, error } = await supabase
@@ -82,7 +123,7 @@ export async function POST(request: Request) {
           id_type: id_type || null,
           weight: weight || null,
           height: height || null,
-          team_id: Number(team_id),
+          team_id: teamIdNum,
           status: status || 'active',
         },
       ])
@@ -114,6 +155,14 @@ export async function DELETE(request: Request) {
         { error: 'Missing player ID' },
         { status: 400 }
       )
+    }
+
+    const user = await getAuthUser()
+    if (user?.role === 'team_admin') {
+      const access = await assertPlayerBelongsToTeamAdmin(Number(id))
+      if (!access.ok) {
+        return Response.json({ error: access.error }, { status: access.status })
+      }
     }
 
     const supabase = createAdminClient()

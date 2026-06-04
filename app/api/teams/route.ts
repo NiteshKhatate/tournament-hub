@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase-admin'
-import { cookies } from 'next/headers'
+import { encryptPassword } from '@/lib/auth-utils'
 
 // GET all teams
 export async function GET(request: Request) {
@@ -42,48 +42,62 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, email, contact, tournament_id, status, disqualified_reason } = body
+    const {
+      name,
+      email,
+      contact,
+      tournament_id,
+      status,
+      disqualified_reason,
+      username,
+      password,
+    } = body
 
-    // Validate required fields
-    if (!name || !email || !contact || !tournament_id) {
+    if (!name || !email || !contact || !tournament_id || !username || !password) {
       return Response.json(
-        { error: 'Missing required fields: name, email, contact, tournament_id' },
+        {
+          error:
+            'Missing required fields: name, email, contact, tournament_id, username, password',
+        },
         { status: 400 }
       )
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      return Response.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      )
+      return Response.json({ error: 'Invalid email format' }, { status: 400 })
     }
 
-    // Get login_id from auth token
-    const cookieStore = await cookies()
-    const authToken = cookieStore.get('auth_token')?.value
-
-    if (!authToken) {
+    const encryptionSalt = process.env.ENCRYPTION_SALT
+    if (!encryptionSalt) {
       return Response.json(
-        { error: 'Unauthorized - must be logged in' },
-        { status: 401 }
-      )
-    }
-
-    let loginId: number
-    try {
-      const user = JSON.parse(authToken)
-      loginId = user.id
-    } catch {
-      return Response.json(
-        { error: 'Invalid authentication token' },
-        { status: 401 }
+        { error: 'Encryption salt not configured' },
+        { status: 500 }
       )
     }
 
     const supabase = createAdminClient()
+    const encryptedPassword = encryptPassword(password, encryptionSalt)
+
+    const { data: loginData, error: loginError } = await supabase
+      .from('login')
+      .insert([
+        {
+          username,
+          password: encryptedPassword,
+          role: 'team_admin',
+        },
+      ])
+      .select()
+
+    if (loginError) {
+      return Response.json(
+        { error: `Failed to create login: ${loginError.message}` },
+        { status: 400 }
+      )
+    }
+
+    const loginId = loginData?.[0]?.id
 
     const { data, error } = await supabase
       .from('teams')
@@ -102,6 +116,7 @@ export async function POST(request: Request) {
       .single()
 
     if (error) {
+      await supabase.from('login').delete().eq('id', loginId)
       return Response.json({ error: error.message }, { status: 500 })
     }
 
