@@ -46,7 +46,7 @@ export default function Sidebar() {
     fetchUser()
   }, [])
 
-  const hiddenForTeamAdmin = ['/organisers', '/teams']
+  const hiddenForTeamAdmin = ['/organisers', '/teams', '/tournaments']
 
   // Filter navigation items based on user role
   const filteredNavigationItems = navigationItems.filter((item) => {
