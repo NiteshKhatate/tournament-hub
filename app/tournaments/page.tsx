@@ -94,12 +94,12 @@ export default async function TournamentsPage() {
 
       {/* Main Content */}
       <main className="p-8">
-        {error && (
+        {error ? (
           <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg border border-red-300">
             <p className="font-semibold">Error loading tournaments:</p>
             <p className="text-sm mt-1">{errorMessage}</p>
           </div>
-        )}
+        ) : <></>}
 
         {/* Action Button */}
         <div className="mb-6">
