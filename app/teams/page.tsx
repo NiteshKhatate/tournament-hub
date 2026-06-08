@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { cookies } from 'next/headers'
-import DeleteTeamButton from './DeleteTeamButton'
+import DeleteButton from '@/components/DeleteButtton'
 
 export default async function TeamsPage() {
   let teams: any[] = []
@@ -104,12 +104,12 @@ export default async function TeamsPage() {
 
       {/* Main Content */}
       <main className="p-8">
-        {error && (
+        {error ? (
           <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg border border-red-300">
             <p className="font-semibold">Error loading teams:</p>
             <p className="text-sm mt-1">{errorMessage}</p>
           </div>
-        )}
+        ) : <></>}
 
         {/* Action Button */}
         <div className="mb-6">
@@ -182,9 +182,10 @@ export default async function TeamsPage() {
                         >
                           Edit
                         </Link>
-                        <DeleteTeamButton
-                          id={team.id}
-                          name={team.name}
+                        <DeleteButton
+                          apiUrl={`/api/teams/${team.id}`}
+                          entityName={team.name}
+                          entityType="team"
                         />
                       </td>
                     </tr>
