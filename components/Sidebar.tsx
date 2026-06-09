@@ -9,6 +9,7 @@ const navigationItems = [
   { name: 'Organisers', href: '/organisers', icon: '👔', requireRole: 'admin' },
   { name: 'Tournaments', href: '/tournaments', icon: '🏆', requireRole: null },
   { name: 'Teams', href: '/teams', icon: '👥', requireRole: null },
+  { name: 'Groups', href: '/groups', icon: '👨‍👩‍👧‍👦', requireRole: null },
   { name: 'Players', href: '/players', icon: '👤', requireRole: null },
   { name: 'Schedule', href: '/schedule', icon: '📅', requireRole: null },
   { name: 'Results', href: '/results', icon: '📈', requireRole: null },

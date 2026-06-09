@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { getAuthUser, getTeamByLoginId } from '@/lib/auth-session'
-import DeletePlayerButton from './DeletePlayerButton'
+import DeleteButton from '@/components/DeleteButtton'
 
 export default async function PlayersPage() {
   let players: any[] = []
@@ -134,12 +134,12 @@ export default async function PlayersPage() {
 
       {/* Main Content */}
       <main className="p-8">
-        {error && (
+        {error ? (
           <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg border border-red-300">
             <p className="font-semibold">Error loading players:</p>
             <p className="text-sm mt-1">{errorMessage}</p>
           </div>
-        )}
+        ) : <></>}
 
         {/* Action Button */}
         <div className="mb-6">
@@ -212,9 +212,10 @@ export default async function PlayersPage() {
                         >
                           Edit
                         </Link>
-                        <DeletePlayerButton
-                          id={player.id}
-                          name={player.name}
+                        <DeleteButton
+                          apiUrl={`/api/players/${player.id}`}
+                          entityName={player.name}
+                          entityType="player"
                         />
                       </td>
                     </tr>
