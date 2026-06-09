@@ -3,40 +3,54 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-type DeleteTeamButtonProps = {
-  id: number
-  name: string
+type DeleteButtonProps = {
+  apiUrl: string
+  entityName: string
+  entityType?: string
+  onSuccess?: () => void
 }
 
-export default function DeleteTeamButton({
-  id,
-  name,
-}: DeleteTeamButtonProps) {
+export default function DeleteButton({
+  apiUrl,
+  entityName,
+  entityType = 'record',
+  onSuccess,
+}: DeleteButtonProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async () => {
     const confirmed = window.confirm(
-      `Delete team "${name}"? This cannot be undone.`
+      `Delete ${entityType} "${entityName}"? This cannot be undone.`
     )
+
     if (!confirmed) return
 
     setIsDeleting(true)
 
     try {
-      const response = await fetch(`/api/teams/${id}`, {
+      const response = await fetch(apiUrl, {
         method: 'DELETE',
       })
+
       const data = await response.json()
 
       if (!response.ok) {
-        alert(data.error || 'Failed to delete team')
+        alert(data.error || `Failed to delete ${entityType}`)
         return
       }
 
-      router.refresh()
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.refresh()
+      }
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to delete team')
+      alert(
+        err instanceof Error
+          ? err.message
+          : `Failed to delete ${entityType}`
+      )
     } finally {
       setIsDeleting(false)
     }

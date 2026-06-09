@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { cookies } from 'next/headers'
-import DeleteTournamentButton from './DeleteTournamentButton'
+import DeleteButton from '@/components/DeleteButtton'
 
 export default async function TournamentsPage() {
   let tournaments: any[] = []
@@ -174,9 +174,10 @@ export default async function TournamentsPage() {
                         >
                           Edit
                         </Link>
-                        <DeleteTournamentButton
-                          id={tournament.id}
-                          name={tournament.name}
+                        <DeleteButton
+                          apiUrl={`/api/tournaments/${tournament.id}`}
+                          entityName={tournament.name}
+                          entityType="tournament"
                         />
                       </td>
                     </tr>
