@@ -5,7 +5,7 @@ import { encryptPassword } from '@/lib/auth-utils'
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const tournamentIds = searchParams.get('tournament_ids')
+    const tournamentId = searchParams.get('tournament_id')
 
     const supabase = createAdminClient()
 
@@ -14,12 +14,9 @@ export async function GET(request: Request) {
       .select('*')
       .order('created', { ascending: false })
 
-    // If tournament_ids is provided, filter by multiple tournament IDs
-    if (tournamentIds) {
-      const ids = tournamentIds.split(',').map(id => Number(id.trim())).filter(id => !isNaN(id))
-      if (ids.length > 0) {
-        query = query.in('tournament_id', ids)
-      }
+    // Filter only when tournament_id is provided
+    if (tournamentId) {
+      query = query.eq('tournament_id', Number(tournamentId))
     }
 
     const { data, error } = await query
@@ -31,6 +28,7 @@ export async function GET(request: Request) {
     return Response.json({ teams: data }, { status: 200 })
   } catch (error) {
     console.error('Teams GET error:', error)
+
     return Response.json(
       { error: 'An error occurred while fetching teams' },
       { status: 500 }
