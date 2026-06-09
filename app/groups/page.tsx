@@ -114,7 +114,7 @@ export default async function GroupsPage() {
         {/* Action Button */}
         <div className="mb-6">
           <Link
-            href="/teams/new"
+            href="/groups/new"
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition"
           >
             + Add New Group
