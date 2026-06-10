@@ -74,35 +74,55 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 }
 
 // DELETE - Delete a group
-export async function DELETE(request: Request, { params }: RouteContext) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const { id } = await params
+
     const supabase = createAdminClient()
 
-    const { data: group, error: fetchError } = await supabase
-      .from('groups')
-      .select('id')
-      .eq('id', Number(id))
-      .single()
+    // Delete group-team mappings first
+    const { error: groupTeamsError } = await supabase
+      .from('group_teams')
+      .delete()
+      .eq('group_id', id)
 
-    if (fetchError || !group) {
-      return Response.json({ error: 'Group not found' }, { status: 404 })
+    if (groupTeamsError) {
+      return Response.json(
+        { error: groupTeamsError.message },
+        { status: 500 }
+      )
     }
 
-    const { error: deleteError } = await supabase
+    // Delete group
+    const { error: groupError } = await supabase
       .from('groups')
       .delete()
-      .eq('id', Number(id))
+      .eq('id', id)
 
-    if (deleteError) {
-      return Response.json({ error: 'Failed to delete group' }, { status: 500 })
+    if (groupError) {
+      return Response.json(
+        { error: groupError.message },
+        { status: 500 }
+      )
     }
 
-    return Response.json({ success: true }, { status: 200 })
-  } catch (error) {
-    console.error('Group DELETE error:', error)
     return Response.json(
-      { error: 'An error occurred while deleting group' },
+      {
+        success: true,
+        message: 'Group deleted successfully',
+      },
+      { status: 200 }
+    )
+  } catch (error) {
+    console.error('Delete group error:', error)
+
+    return Response.json(
+      {
+        error: 'An error occurred while deleting the group',
+      },
       { status: 500 }
     )
   }
