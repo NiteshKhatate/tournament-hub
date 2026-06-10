@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { cookies } from 'next/headers'
 import DeleteButton from '@/components/DeleteButtton'
+import GroupsTable from '@/components/groups/GroupsTable'
 
 export default async function GroupsPage() {
   let groups: any[] = []
@@ -128,43 +129,7 @@ export default async function GroupsPage() {
               <p>No groups found. Create your first group to get started.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Name</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Tournament</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Created</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {groups.map((group, index) => (
-                    <tr
-                      key={group.id}
-                      className={`border-b border-slate-200 hover:bg-slate-50 transition ${
-                        index === groups.length - 1 ? 'border-b-0' : ''
-                      }`}
-                    >
-                      <td className="px-6 py-4 text-sm font-medium text-slate-900">{group.name}</td>
-                      <td className="px-6 py-4 text-sm text-slate-600">
-                        {group.tournaments?.name || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-500">
-                        {group.created ? new Date(group.created).toLocaleDateString() : '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <DeleteButton
-                          apiUrl={`/api/groups/${group.id}`}
-                          entityName={group.name}
-                          entityType="group"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <GroupsTable groups={groups} />
           )}
         </div>
       </main>
