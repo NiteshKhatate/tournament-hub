@@ -1,5 +1,4 @@
 import { createAdminClient } from '@/lib/supabase-admin'
-import { encryptPassword } from '@/lib/auth-utils'
 
 // GET all teams
 export async function GET(request: Request) {
