@@ -6,10 +6,17 @@ export async function POST(request: Request) {
 
     const tournament_id = Number(body.tournament_id)
     const group_count = Number(body.group_count)
+    const qualifyingTeamsCount = Number(
+      body.qualifying_teams_count
+    )
 
-    if (!tournament_id || !group_count) {
+    if (
+      !tournament_id ||
+      !group_count ||
+      qualifyingTeamsCount < 0
+    ) {
       return Response.json(
-        { error: 'Tournament ID and Group Count are required' },
+        { error: 'Invalid request' },
         { status: 400 }
       )
     }
@@ -93,6 +100,7 @@ export async function POST(request: Request) {
       (_, index) => ({
         name: `Group ${index + 1}`,
         tournament_id,
+        qualifying_teams_count: qualifyingTeamsCount,
       })
     )
 

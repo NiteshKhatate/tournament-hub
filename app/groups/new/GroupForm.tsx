@@ -24,6 +24,7 @@ export default function GroupForm() {
 
   const [tournaments, setTournaments] = useState<Tournament[]>([])
   const [selectedTournament, setSelectedTournament] = useState('')
+  const [qualifyingTeamsCount, setQualifyingTeamsCount] = useState<number>(0)
   const [teams, setTeams] = useState<Team[]>([])
   const [isLoadingTeams, setIsLoadingTeams] = useState(false)
 
@@ -104,6 +105,11 @@ export default function GroupForm() {
       return
     }
 
+    if (!qualifyingTeamsCount) {
+      setError('Please set qualifying teams count')
+      return
+    }
+
     if (!selectedOption) {
       setError('Please select a group configuration')
       return
@@ -120,6 +126,7 @@ export default function GroupForm() {
         },
         body: JSON.stringify({
           tournament_id: Number(selectedTournament),
+          qualifying_teams_count: qualifyingTeamsCount,
           group_count: selectedOption.groups,
         }),
       })
@@ -241,6 +248,23 @@ export default function GroupForm() {
                         </span>
                       </label>
                     ))}
+                  </div>
+                  <div className='mt-6'>
+                    <label className='mblock text-sm font-semibold text-slate-900'>
+                      Qualifying Teams Per Group
+                    </label>
+                    <div className='mt-2'>
+                      <input
+                        type="number"
+                        min="0"
+                        max={selectedOption?.teamsPerGroup ?? 0}
+                        value={qualifyingTeamsCount}
+                        onChange={(e) =>
+                          setQualifyingTeamsCount(Number(e.target.value))
+                        }
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
