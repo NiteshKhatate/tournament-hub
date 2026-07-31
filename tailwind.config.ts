@@ -9,6 +9,7 @@ const config: Config = {
       colors: {
         'app-bg': '#e2e3d3',
         'app-text': '#120b0b',
+        'input-border': '#4f4040',
       },
       fontFamily: {
         poppins: ['var(--font-poppins)', 'sans-serif'],
