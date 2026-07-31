@@ -22,7 +22,7 @@ export default function LoginForm() {
       validationSchema={LoginSchema}
       onSubmit={async (values, { setSubmitting }) => {
         setServerError('');
-        const { error } = await loginUser(values.username, values.password);
+        const { data, error } = await loginUser(values.username, values.password);
         setSubmitting(false);
 
         if (error) {
@@ -30,6 +30,7 @@ export default function LoginForm() {
           return;
         }
 
+        localStorage.setItem('session_user', data.username);
         router.push('/dashboard');
       }}
     >
