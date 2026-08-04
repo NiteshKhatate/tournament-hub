@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
+import { getSports } from '@/services/sports';
 
 const PAGE_SIZE = 10;
 
@@ -8,20 +9,6 @@ interface Sport {
   status: string;
   created: string;
 }
-
-async function getSports(page: number) {
-  const from = (page - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
-
-  const { data, count } = await supabase
-    .from('sports')
-    .select('*', { count: 'exact' })
-    .order('created', { ascending: false })
-    .range(from, to);
-
-  return { data: (data ?? []) as Sport[], count: count ?? 0 };
-}
-
 
 export default async function SportsPage({
   searchParams,
@@ -35,8 +22,22 @@ export default async function SportsPage({
 
   return (
     <>
-      <h1 className="text-app-text">Sports</h1>
-      <p className="mt-1 text-sm text-gray-500">Manage sports available on the platform</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-app-text">Sports</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Manage sports available on the platform
+          </p>
+        </div>
+
+        <Link
+          href="/sports/create"
+          className="rounded-lg bg-app-text px-5 py-2.5 font-medium text-app-bg transition hover:opacity-90"
+        >
+          Create
+        </Link>
+      </div>
+
       <div className="mt-8 overflow-hidden rounded-2xl bg-white shadow-md">
         <table className="w-full text-left">
           <thead className="border-b border-gray-200 bg-gray-50">
@@ -54,7 +55,7 @@ export default async function SportsPage({
                 </td>
               </tr>
             ) : (
-              sports.map((sport) => (
+              (sports as Sport[]).map((sport) => (
                 <tr key={sport.id} className="border-b border-gray-100 last:border-0">
                   <td className="px-6 py-4 text-app-text">{sport.name}</td>
                   <td className="px-6 py-4">
@@ -80,15 +81,26 @@ export default async function SportsPage({
 
       {totalPages > 1 && (
         <div className="mt-6 flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Page {page} of {totalPages}
+          </p>
           <div className="flex gap-2">
-            <a href={`/sports?page=${Math.max(1, page - 1)}`}
+            <Link
+              href={`/sports?page=${Math.max(1, page - 1)}`}
               className={`rounded-lg border-2 border-input-border px-4 py-2 text-sm font-medium text-app-text transition hover:bg-app-bg ${
                 page === 1 ? 'pointer-events-none opacity-40' : ''
-              }`}>Previous</a>
-              <a href={`/sports?page=${Math.min(totalPages, page + 1)}`}
+              }`}
+            >
+              Previous
+            </Link>
+            <Link
+              href={`/sports?page=${Math.min(totalPages, page + 1)}`}
               className={`rounded-lg border-2 border-input-border px-4 py-2 text-sm font-medium text-app-text transition hover:bg-app-bg ${
                 page === totalPages ? 'pointer-events-none opacity-40' : ''
-              }`}>Next</a>
+              }`}
+            >
+              Next
+            </Link>
           </div>
         </div>
       )}
