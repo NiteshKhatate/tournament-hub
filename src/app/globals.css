@@ -1,6 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-app-bg: #e2e3d3;
+  --color-app-text: #120b0b;
+  --color-input-border: #4f4040;
+  --font-poppins: var(--font-poppins), sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
 
 :root {
   --color-bg: #e2e3d3;
@@ -14,14 +27,6 @@ body {
   font-size: 14px;
 }
 
-h1 {
-  font-size: 42px;
-}
-
-h2 {
-  font-size: 26px;
-}
-
-h3 {
-  font-size: 18px;
-}
+h1 { font-size: 42px; }
+h2 { font-size: 26px; }
+h3 { font-size: 18px; }
