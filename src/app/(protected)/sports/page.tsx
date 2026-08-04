@@ -1,7 +1,4 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { getSports } from '@/services/sports';
+import { supabase } from '@/lib/supabase';
 
 const PAGE_SIZE = 10;
 
@@ -12,28 +9,34 @@ interface Sport {
   created: string;
 }
 
-export default function SportsPage() {
-  const [sports, setSports] = useState<Sport[]>([]);
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+async function getSports(page: number) {
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
 
-  useEffect(() => {
-    setLoading(true);
-    getSports(page).then(({ data, count }) => {
-      setSports(data);
-      setTotal(count);
-      setLoading(false);
-    });
-  }, [page]);
+  const { data, count } = await supabase
+    .from('sports')
+    .select('*', { count: 'exact' })
+    .order('created', { ascending: false })
+    .range(from, to);
 
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  return { data: (data ?? []) as Sport[], count: count ?? 0 };
+}
+
+
+export default async function SportsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const { data: sports, count } = await getSports(page);
+  const totalPages = Math.ceil(count / PAGE_SIZE);
 
   return (
     <>
       <h1 className="text-app-text">Sports</h1>
       <p className="mt-1 text-sm text-gray-500">Manage sports available on the platform</p>
-
       <div className="mt-8 overflow-hidden rounded-2xl bg-white shadow-md">
         <table className="w-full text-left">
           <thead className="border-b border-gray-200 bg-gray-50">
@@ -44,13 +47,7 @@ export default function SportsPage() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={3} className="px-6 py-8 text-center text-gray-400">
-                  Loading...
-                </td>
-              </tr>
-            ) : sports.length === 0 ? (
+            {sports.length === 0 ? (
               <tr>
                 <td colSpan={3} className="px-6 py-8 text-center text-gray-400">
                   No sports found
@@ -83,24 +80,15 @@ export default function SportsPage() {
 
       {totalPages > 1 && (
         <div className="mt-6 flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            Page {page} of {totalPages}
-          </p>
           <div className="flex gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="rounded-lg border-2 border-input-border px-4 py-2 text-sm font-medium text-app-text transition hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="rounded-lg border-2 border-input-border px-4 py-2 text-sm font-medium text-app-text transition hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
-            </button>
+            <a href={`/sports?page=${Math.max(1, page - 1)}`}
+              className={`rounded-lg border-2 border-input-border px-4 py-2 text-sm font-medium text-app-text transition hover:bg-app-bg ${
+                page === 1 ? 'pointer-events-none opacity-40' : ''
+              }`}>Previous</a>
+              <a href={`/sports?page=${Math.min(totalPages, page + 1)}`}
+              className={`rounded-lg border-2 border-input-border px-4 py-2 text-sm font-medium text-app-text transition hover:bg-app-bg ${
+                page === totalPages ? 'pointer-events-none opacity-40' : ''
+              }`}>Next</a>
           </div>
         </div>
       )}

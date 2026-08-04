@@ -6,6 +6,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { loginUser } from '@/services/auth';
 import Input from '@/components/common/Input';
+import Cookies from 'js-cookie';
 
 const LoginSchema = Yup.object().shape({
   username: Yup.string().required('Username is required'),
@@ -30,7 +31,7 @@ export default function LoginForm() {
           return;
         }
 
-        localStorage.setItem('session_user', data.username);
+        Cookies.set('session_user', data.username, { expires: 7 });
         router.push('/dashboard');
       }}
     >

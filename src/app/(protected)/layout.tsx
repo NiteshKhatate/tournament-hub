@@ -1,27 +1,13 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import SideNav from '@/components/common/Sidenav';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
-export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [checked, setChecked] = useState(false);
+export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const session = cookieStore.get('session_user');
 
-  useEffect(() => {
-    const session = localStorage.getItem('session_user');
-
-    if (!session) {
-      router.replace('/login');
-      return;
-    }
-
-    setChecked(true);
-  }, [router]);
-
-  // avoid flashing protected content before the check completes
-  if (!checked) {
-    return null;
+  if (!session) {
+    redirect('/login');
   }
 
   return (
