@@ -10,10 +10,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Tournaments', href: '/tournaments' },
-  { label: 'Organisers', href: '/organisers' },
-  { label: 'Teams', href: '/teams' },
-  { label: 'Players', href: '/players' },
+  { label: 'Sports', href: '/sports' },
 ];
 
 export default function SideNav() {
