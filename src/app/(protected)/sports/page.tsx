@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getSports } from '@/services/sports';
+import DeleteSportButton from '@/components/sports/DeleteSportButton';
 
 const PAGE_SIZE = 10;
 
@@ -45,32 +46,32 @@ export default async function SportsPage({
               <th className="px-6 py-3 text-sm font-medium text-gray-500">Name</th>
               <th className="px-6 py-3 text-sm font-medium text-gray-500">Status</th>
               <th className="px-6 py-3 text-sm font-medium text-gray-500">Created</th>
+              <th className="px-6 py-3 text-sm font-medium text-gray-500">Actions</th>
             </tr>
           </thead>
           <tbody>
             {sports.length === 0 ? (
               <tr>
-                <td colSpan={3} className="px-6 py-8 text-center text-gray-400">
+                <td colSpan={4} className="px-6 py-8 text-center text-gray-400">
                   No sports found
                 </td>
               </tr>
             ) : (
-              (sports as Sport[]).map((sport) => (
+              sports.map((sport) => (
                 <tr key={sport.id} className="border-b border-gray-100 last:border-0">
                   <td className="px-6 py-4 text-app-text">{sport.name}</td>
                   <td className="px-6 py-4">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${
                         sport.status === 'active'
                           ? 'bg-green-100 text-green-700'
                           : 'bg-gray-100 text-gray-500'
-                      }`}
-                    >
-                      {sport.status}
-                    </span>
+                      }`}>{sport.status}</span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {new Date(sport.created).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <DeleteSportButton id={sport.id} />
                   </td>
                 </tr>
               ))

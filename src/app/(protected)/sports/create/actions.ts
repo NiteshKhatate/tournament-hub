@@ -17,3 +17,17 @@ export async function createSport(name: string) {
   revalidatePath('/sports');
   return { data, error: null };
 }
+
+export async function deleteSport(id: number) {
+  const { error } = await supabaseAdmin
+    .from('sports')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath('/sports');
+  return { error: null };
+}
