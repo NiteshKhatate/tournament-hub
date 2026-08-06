@@ -37,3 +37,10 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://jvbkhufaqowomglassmu.supabase.co
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_pHobsJ7TB7CKBBLSr6ggCA_EJksXlRZ
+  deploy:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy
+        run: curl -X POST "https://api.render.com/deploy/srv-d9q0ha1t0dsc73c19u7g?key=sH54f3cLkjw"
