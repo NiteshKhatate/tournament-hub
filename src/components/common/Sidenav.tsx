@@ -11,6 +11,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'Sports', href: '/sports' },
+  { label: 'Organisers', href: '/organisers' },
 ];
 
 export default function SideNav() {
