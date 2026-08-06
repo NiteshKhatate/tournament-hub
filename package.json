@@ -35,9 +35,11 @@
     "eslint-config-next": "16.2.12",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
+    "jest-mock": "^30.4.1",
     "postcss": "^8.5.25",
     "tailwindcss": "^4.3.3",
     "ts-jest": "^29.4.12",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
