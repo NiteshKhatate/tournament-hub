@@ -7,13 +7,34 @@ jest.mock('@/lib/supabase', () => ({
   },
 }));
 
-function mockSupabaseChain(finalResult: any) {
-  const chain: any = {
+// Helper to build a chainable Supabase query mock
+interface MockSupabaseChain {
+  select: jest.Mock;
+  insert: jest.Mock;
+  update: jest.Mock;
+  delete: jest.Mock;
+  eq: jest.Mock;
+  order?: jest.Mock;
+  range?: jest.Mock;
+  maybeSingle: jest.Mock;
+  single: jest.Mock;
+  then: (resolve: (value: { data: unknown; error?: unknown; count?: number }) => void) => void;
+}
+
+function mockSupabaseChain(
+  finalResult: { data: unknown; error?: unknown; count?: number }
+): MockSupabaseChain {
+  const chain: MockSupabaseChain = {
     select: jest.fn(() => chain),
+    insert: jest.fn(() => chain),
+    update: jest.fn(() => chain),
+    delete: jest.fn(() => chain),
+    eq: jest.fn(() => chain),
     order: jest.fn(() => chain),
     range: jest.fn(() => Promise.resolve(finalResult)),
-    eq: jest.fn(() => chain),
+    maybeSingle: jest.fn(() => Promise.resolve(finalResult)),
     single: jest.fn(() => Promise.resolve(finalResult)),
+    then: (resolve) => resolve(finalResult),
   };
   return chain;
 }
