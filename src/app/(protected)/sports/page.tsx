@@ -4,13 +4,6 @@ import DeleteSportButton from '@/components/sports/DeleteSportButton';
 
 const PAGE_SIZE = 10;
 
-interface Sport {
-  id: number;
-  name: string;
-  status: string;
-  created: string;
-}
-
 export default async function SportsPage({
   searchParams,
 }: {
