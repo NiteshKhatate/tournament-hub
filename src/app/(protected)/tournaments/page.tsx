@@ -16,6 +16,20 @@ interface Tournament {
   created: string;
 }
 
+interface Criteria {
+  id: number;
+  tournament_id: number;
+  gender: string | null;
+  type: string;
+  operator: string;
+  value_min: number;
+  value_max: number | null;
+  unit: string | null;
+  max_players_count: number;
+  min_players_count: number;
+  status: 'active' | 'inactive';
+}
+
 export default async function TournamentsPage({
   searchParams,
 }: {
@@ -27,11 +41,11 @@ export default async function TournamentsPage({
   const totalPages = Math.ceil(count / PAGE_SIZE);
 
   // Fetch criteria for all tournaments on this page
-  const criteriaMap: Record<number, any> = {};
+  const criteriaMap: Record<number, Criteria> = {};
   for (const tournament of tournaments) {
     const { data: criteria } = await getTournamentCriteria(tournament.id);
     if (criteria && criteria.length > 0) {
-      criteriaMap[tournament.id] = criteria[0]; // store first criteria if exists
+      criteriaMap[tournament.id] = criteria[0];
     }
   }
 
