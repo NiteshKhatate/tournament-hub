@@ -8,11 +8,12 @@ const PAGE_SIZE = 10;
 interface Team {
   id: number;
   name: string;
-  sports: { name: string };
+  sports: { name: string }[] | null;
   email: string;
   contact: number;
   status: string;
   created: string;
+  sport_id: number;
 }
 
 export default async function TeamsPage({
@@ -61,7 +62,9 @@ export default async function TeamsPage({
               (teams as Team[]).map((team) => (
                 <tr key={team.id} className="border-b border-gray-100 last:border-0">
                   <td className="px-6 py-4 text-app-text">{team.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{team.sports.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {team.sports && team.sports.length > 0 ? team.sports[0].name : 'N/A'}
+                  </td>
                   <td className="px-6 py-4 text-sm text-gray-500">{team.email}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">{team.contact}</td>
                   <td className="px-6 py-4">
