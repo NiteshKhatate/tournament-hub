@@ -8,12 +8,13 @@ const PAGE_SIZE = 10;
 interface Team {
   id: number;
   name: string;
-  sports: { name: string }[] | null;
+  sports: { id: number; name: string } | null;
   email: string;
   contact: number;
   status: string;
   created: string;
   sport_id: number;
+  login_id: number;
 }
 
 export default async function TeamsPage({
@@ -63,7 +64,7 @@ export default async function TeamsPage({
                 <tr key={team.id} className="border-b border-gray-100 last:border-0">
                   <td className="px-6 py-4 text-app-text">{team.name}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {team.sports && team.sports.length > 0 ? team.sports[0].name : 'N/A'}
+                    {team.sports && team.sports.name ? team.sports.name : 'N/A'}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">{team.email}</td>
                   <td className="px-6 py-4 text-sm text-gray-500">{team.contact}</td>
@@ -83,6 +84,13 @@ export default async function TeamsPage({
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
+                      <Button
+                        href={`/teams/apply/${team.id}`}
+                        variant="secondary"
+                        className="!px-3 !py-1.5 text-sm"
+                      >
+                        Apply
+                      </Button>
                       <Button
                         href={`/teams/edit/${team.id}`}
                         variant="secondary"

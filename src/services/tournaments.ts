@@ -34,3 +34,17 @@ export async function getTournamentCriteria(tournamentId: number) {
 
   return { data: data ?? [], error };
 }
+
+export async function getActiveTournaments() {
+  const { data, error } = await supabase
+    .from('tournaments')
+    .select('id, name')
+    .eq('status', 'active')
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching active tournaments:', error);
+  }
+
+  return { data: data ?? [], error };
+}
