@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getTeams } from '@/services/teams';
 import Button from '@/components/common/Button';
-import DeleteTeamButton from '@/components/teams/DeleteTeamButton';
+import TeamsTable from '@/components/teams/TeamsTable';
 
 const PAGE_SIZE = 10;
 
@@ -15,6 +15,7 @@ interface Team {
   created: string;
   sport_id: number;
   login_id: number;
+  hasApplications: boolean;
 }
 
 export default async function TeamsPage({
@@ -39,73 +40,8 @@ export default async function TeamsPage({
         </Button>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-2xl bg-white shadow-md">
-        <table className="w-full text-left">
-          <thead className="border-b border-gray-200 bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Name</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Sport</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Email</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Contact</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Status</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Created</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {teams.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
-                  No teams found
-                </td>
-              </tr>
-            ) : (
-              (teams as Team[]).map((team) => (
-                <tr key={team.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-6 py-4 text-app-text">{team.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {team.sports && team.sports.name ? team.sports.name : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{team.email}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{team.contact}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        team.status === 'active'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
-                      }`}
-                    >
-                      {team.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(team.created).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <Button
-                        href={`/teams/apply/${team.id}`}
-                        variant="secondary"
-                        className="!px-3 !py-1.5 text-sm"
-                      >
-                        Apply
-                      </Button>
-                      <Button
-                        href={`/teams/edit/${team.id}`}
-                        variant="secondary"
-                        className="!px-3 !py-1.5 text-sm"
-                      >
-                        Edit
-                      </Button>
-                      <DeleteTeamButton id={team.id} />
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className="mt-8">
+        <TeamsTable teams={teams as Team[]} />
       </div>
 
       {totalPages > 1 && (

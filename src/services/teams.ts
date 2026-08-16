@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { getTeamApplicationsMap } from './tournament-teams';
 
 const PAGE_SIZE = 10;
 
@@ -17,19 +18,21 @@ export async function getTeams(page: number) {
     return { data: [], count: 0 };
   }
 
-  // Fetch sports separately and map them
   if (data && data.length > 0) {
-    const sportIds = [...new Set(data.map((team: any) => team.sport_id))];
-    const { data: sportsData } = await supabase
-      .from('sports')
-      .select('id, name')
-      .in('id', sportIds);
+    const sportIds = [...new Set(data.map((team) => team.sport_id))];
+    const teamIds = data.map((team) => team.id);
 
-    const sportsMap = new Map(sportsData?.map((s: any) => [s.id, s]) || []);
+    const [sportsResult, applicationsMap] = await Promise.all([
+      supabase.from('sports').select('id, name').in('id', sportIds),
+      getTeamApplicationsMap(teamIds),
+    ]);
 
-    const enrichedData = data.map((team: any) => ({
+    const sportsMap = new Map(sportsResult.data?.map((s) => [s.id, s]) || []);
+
+    const enrichedData = data.map((team) => ({
       ...team,
       sports: sportsMap.get(team.sport_id) || null,
+      hasApplications: applicationsMap.get(team.id) || false,
     }));
 
     return { data: enrichedData, count: count ?? 0 };
@@ -50,7 +53,6 @@ export async function getTeamById(id: number) {
     return { data: null, error };
   }
 
-  // Fetch sport separately
   if (data && data.sport_id) {
     const { data: sportData } = await supabase
       .from('sports')
