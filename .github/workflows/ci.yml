@@ -32,24 +32,37 @@ jobs:
       - name: Run tests
         run: npm test
 
+      - name: Set environment variables
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/staging" ]; then
+            echo "SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL_STAGING }}" >> $GITHUB_ENV
+            echo "SUPABASE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY_STAGING }}" >> $GITHUB_ENV
+          else
+            echo "SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> $GITHUB_ENV
+            echo "SUPABASE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}" >> $GITHUB_ENV
+            echo "SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> $GITHUB_ENV
+          fi
+
       - name: Build
         run: npm run build
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ env.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ env.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SERVICE_ROLE_KEY }}
+
   deploy-staging:
     needs: build-and-test
     if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Render Deploy
-        run: curl -X POST "https://api.render.com/deploy/srv-d9q0ha1t0dsc73c19u7g?key=sH54f3cLkjw"
-  
+      - name: Trigger Render Staging Deploy
+        run: curl -X POST "${{ secrets.RENDER_STAGING_DEPLOY_HOOK_URL }}"
+
   deploy-production:
     needs: build-and-test
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Render Deploy
-        run: curl -X POST "https://api.render.com/deploy/srv-d9q0ha1t0dsc73c19u7g?key=sH54f3cLkjw"
+      - name: Trigger Render Production Deploy
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
