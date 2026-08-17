@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render Staging Deploy
-        run: curl -X POST "${{ secrets.RENDER_STAGING_DEPLOY_HOOK_URL }}"
+        run: curl -X POST "https://api.render.com/deploy/srv-da1b8o7qj5pc73cl99ag?key=yMuwPGtquYM"
 
   deploy-production:
     needs: build-and-test
@@ -65,4 +65,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render Production Deploy
-        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+        run: curl -X POST "https://api.render.com/deploy/srv-d9q0ha1t0dsc73c19u7g?key=sH54f3cLkjw"
