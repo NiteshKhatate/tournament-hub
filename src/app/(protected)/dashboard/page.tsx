@@ -1,4 +1,4 @@
-import { getDashboardCounts } from '@/services/dashboard';
+import { getDashboardCounts } from '@/services/dashboard/queries';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import StatCard from '@/components/dashboard/StatCard';
 
