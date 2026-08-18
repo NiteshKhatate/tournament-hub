@@ -34,13 +34,33 @@ interface Sport {
   name: string;
 }
 
+// Get today's date in YYYY-MM-DD format (for min attribute and validation)
+const getTodayString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const TournamentSchema = Yup.object().shape({
   name: Yup.string().required('Tournament name is required').min(2).max(200),
   organiser_id: Yup.number().required('Organiser is required'),
   sport_id: Yup.number().required('Sport is required'),
   entry_fee: Yup.number().required('Entry fee is required').min(0),
-  start_date: Yup.string(),
-  end_date: Yup.string(),
+  start_date: Yup.string()
+    .required('Start date is required')
+    .test('is-future', 'Start date must be today or later', (value) => {
+      if (!value) return true;
+      return value >= getTodayString();
+    }),
+  end_date: Yup.string()
+    .required('End date is required')
+    .test('is-after-start', 'End date must be on or after the start date', function (value) {
+      const { start_date } = this.parent;
+      if (!value || !start_date) return true;
+      return value >= start_date;
+    }),
   venue: Yup.string().max(200),
   geo_location: Yup.string().max(200),
 });
@@ -52,6 +72,7 @@ export default function TournamentForm({ tournament }: TournamentFormProps) {
   const [sports, setSports] = useState<Sport[]>([]);
   const [loading, setLoading] = useState(true);
   const isEditMode = Boolean(tournament);
+  const today = getTodayString();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -172,8 +193,28 @@ export default function TournamentForm({ tournament }: TournamentFormProps) {
           </div>
 
           <Input name="entry_fee" label="Entry Fee (₹)" type="number" placeholder="1000" />
-          <Input name="start_date" label="Start Date" type="date" />
-          <Input name="end_date" label="End Date" type="date" />
+
+          <Input
+            name="start_date"
+            label="Start Date"
+            type="date"
+            min={today}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setFieldValue('start_date', e.target.value);
+              // If end_date is now before the new start_date, clear it
+              if (values.end_date && values.end_date < e.target.value) {
+                setFieldValue('end_date', '');
+              }
+            }}
+          />
+
+          <Input
+            name="end_date"
+            label="End Date"
+            type="date"
+            min={values.start_date || today}
+          />
+
           <Input name="venue" label="Venue" placeholder="e.g. Central Ground" />
           <Input name="geo_location" label="Geo Location" placeholder="e.g. Latitude, Longitude" />
 
