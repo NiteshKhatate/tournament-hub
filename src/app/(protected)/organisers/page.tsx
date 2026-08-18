@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getOrganisers } from '@/services/organisers';
+import { getOrganisers } from '@/services/organisers/queries';
 import Button from '@/components/common/Button';
 import DeleteOrganiserButton from '@/components/organisers/DeleteOrganiserButton';
 

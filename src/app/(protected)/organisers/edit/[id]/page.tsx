@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getOrganiserById } from '@/services/organisers';
+import { getOrganiserById } from '@/services/organisers/queries';
 import OrganiserForm from '@/components/organisers/OrganiserForm';
 
 export default async function EditOrganiserPage({

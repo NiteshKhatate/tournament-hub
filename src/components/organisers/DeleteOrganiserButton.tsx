@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Button from '@/components/common/Button';
-import { deleteOrganiser } from '@/app/(protected)/organisers/actions';
+import { deleteOrganiser } from '@/services/organisers/mutations';
 
 export default function DeleteOrganiserButton({ id }: { id: number }) {
   const [loading, setLoading] = useState(false);

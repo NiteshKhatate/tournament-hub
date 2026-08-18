@@ -1,4 +1,4 @@
-import { getOrganisers, getOrganiserById } from './organisers';
+import { getOrganisers, getOrganiserById } from './queries';
 import { supabase } from '@/lib/supabase';
 
 jest.mock('@/lib/supabase', () => ({
