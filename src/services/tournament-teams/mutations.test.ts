@@ -5,7 +5,7 @@ import {
   createTournamentCriteria,
   updateTournamentCriteria,
   deleteTournamentCriteria,
-} from './actions';
+} from './mutations';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 jest.mock('@/lib/supabase-admin', () => ({

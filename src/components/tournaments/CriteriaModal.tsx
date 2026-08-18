@@ -9,7 +9,7 @@ import {
   createTournamentCriteria,
   updateTournamentCriteria,
   deleteTournamentCriteria,
-} from '@/app/(protected)/tournaments/actions';
+} from '@/services/tournament-teams/mutations';
 
 interface CriteriaModalProps {
   tournamentId: number;

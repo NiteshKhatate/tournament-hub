@@ -7,11 +7,11 @@ jest.mock('@/lib/supabase', () => ({
   },
 }));
 
-jest.mock('../tournament-teams', () => ({
+jest.mock('../tournament-teams/queries', () => ({
   getTeamApplicationsMap: jest.fn(),
 }));
 
-import { getTeamApplicationsMap } from '../tournament-teams';
+import { getTeamApplicationsMap } from '../tournament-teams/queries';
 
 // Suppress console.error noise from intentional error-case tests
 beforeAll(() => {

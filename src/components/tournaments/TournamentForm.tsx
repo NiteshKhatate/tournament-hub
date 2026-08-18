@@ -6,7 +6,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import Input from '@/components/common/Input';
 import Button from '@/components/common/Button';
-import { createTournament, updateTournament } from '@/app/(protected)/tournaments/actions';
+import { createTournament, updateTournament } from '@/services/tournament-teams/mutations';
 import { supabase } from '@/lib/supabase';
 
 interface TournamentFormProps {
