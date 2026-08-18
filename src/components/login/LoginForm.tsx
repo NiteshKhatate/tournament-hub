@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { loginUser } from '@/services/auth';
+import { loginUser } from '@/services/auth/queries';
 import Input from '@/components/common/Input';
 import Cookies from 'js-cookie';
 

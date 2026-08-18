@@ -1,4 +1,4 @@
-import { createOrganiser, updateOrganiser, deleteOrganiser } from './actions';
+import { createOrganiser, updateOrganiser, deleteOrganiser } from './mutations';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import bcrypt from 'bcryptjs';
 

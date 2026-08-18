@@ -1,4 +1,4 @@
-import { getTeamTournamentEntry, getTeamApplications, getTeamApplicationsMap } from './tournament-teams';
+import { getTeamTournamentEntry, getTeamApplications, getTeamApplicationsMap } from './queries';
 import { supabase } from '@/lib/supabase';
 
 jest.mock('@/lib/supabase', () => ({

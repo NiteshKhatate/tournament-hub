@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getTeamById } from '@/services/teams';
+import { getTeamById } from '@/services/teams/queries';
 import TeamForm from '@/components/teams/TeamForm';
 
 export default async function EditTeamPage({

@@ -6,7 +6,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import Input from '@/components/common/Input';
 import Button from '@/components/common/Button';
-import { createTeam, updateTeam, updateTeamStatus } from '@/app/(protected)/teams/actions';
+import { createTeam, updateTeam, updateTeamStatus } from '@/services/teams/mutations';
 import { supabase } from '@/lib/supabase';
 
 interface TeamFormProps {

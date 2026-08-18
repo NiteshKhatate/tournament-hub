@@ -1,4 +1,4 @@
-import { getSports } from './sports';
+import { getSports } from './queries';
 import { supabase } from '@/lib/supabase';
 
 jest.mock('@/lib/supabase', () => ({

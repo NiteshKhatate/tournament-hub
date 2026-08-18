@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import DashboardPage from './page';
-import { getDashboardCounts } from '@/services/dashboard';
+import { getDashboardCounts } from '@/services/dashboard/queries';
 
-jest.mock('@/services/dashboard', () => ({
+jest.mock('@/services/dashboard/queries', () => ({
   getDashboardCounts: jest.fn(),
 }));
 

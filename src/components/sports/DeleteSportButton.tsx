@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Button from '@/components/common/Button';
-import { deleteSport } from '@/app/(protected)/sports/create/actions';
+import { deleteSport } from '@/services/sports/mutations';
 
 export default function DeleteSportButton({ id }: { id: number }) {
   const [loading, setLoading] = useState(false);

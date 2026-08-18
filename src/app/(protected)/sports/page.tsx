@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getSports } from '@/services/sports';
+import { getSports } from '@/services/sports/queries';
 import DeleteSportButton from '@/components/sports/DeleteSportButton';
 
 const PAGE_SIZE = 10;
