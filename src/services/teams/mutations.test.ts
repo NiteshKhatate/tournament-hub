@@ -1,4 +1,4 @@
-import { createTeam, updateTeam, deleteTeam, updateTeamStatus } from './actions';
+import { createTeam, updateTeam, deleteTeam, updateTeamStatus } from './mutations';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import bcrypt from 'bcryptjs';
 

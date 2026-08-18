@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Button from '@/components/common/Button';
-import { deleteTeam } from '@/app/(protected)/teams/actions';
+import { deleteTeam } from '@/services/teams/mutations';
 
 export default function DeleteTeamButton({ id }: { id: number }) {
   const [loading, setLoading] = useState(false);

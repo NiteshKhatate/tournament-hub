@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import Button from '@/components/common/Button';
-import { applyTeamToTournament } from '@/app/(protected)/teams/apply/[id]/actions';
+import { applyTeamToTournament } from '@/services/teams/mutations';
 import { supabase } from '@/lib/supabase';
 
 interface ApplyTeamFormProps {

@@ -1,4 +1,4 @@
-import { getTeams, getTeamById } from './teams';
+import { getTeams, getTeamById } from './queries';
 import { supabase } from '@/lib/supabase';
 
 jest.mock('@/lib/supabase', () => ({
@@ -7,11 +7,11 @@ jest.mock('@/lib/supabase', () => ({
   },
 }));
 
-jest.mock('./tournament-teams', () => ({
+jest.mock('../tournament-teams', () => ({
   getTeamApplicationsMap: jest.fn(),
 }));
 
-import { getTeamApplicationsMap } from './tournament-teams';
+import { getTeamApplicationsMap } from '../tournament-teams';
 
 // Suppress console.error noise from intentional error-case tests
 beforeAll(() => {

@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { getTeamApplicationsMap } from './tournament-teams';
+import { getTeamApplicationsMap } from '../tournament-teams';
 
 const PAGE_SIZE = 10;
 
