@@ -1,4 +1,4 @@
-import { createSport, deleteSport } from './actions';
+import { createSport, deleteSport } from './mutations';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 jest.mock('@/lib/supabase-admin', () => ({
