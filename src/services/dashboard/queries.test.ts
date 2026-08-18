@@ -1,4 +1,4 @@
-import { getDashboardCounts } from './dashboard';
+import { getDashboardCounts } from './queries';
 import { supabase } from '@/lib/supabase';
 
 jest.mock('@/lib/supabase', () => ({

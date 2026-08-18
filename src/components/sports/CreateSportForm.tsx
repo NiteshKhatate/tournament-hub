@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import Input from '@/components/common/Input';
-import { createSport } from '@/app/(protected)/sports/create/actions';
+import { createSport } from '@/services/sports/mutations';
 
 const CreateSportSchema = Yup.object().shape({
   name: Yup.string()

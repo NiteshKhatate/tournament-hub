@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Button from '@/components/common/Button';
 import DeleteTeamButton from '@/components/teams/DeleteTeamButton';
 import ViewApplicationsModal from '@/components/teams/ViewApplicationsModal';
-import { getTeamApplications } from '@/services/tournament-teams';
+import { getTeamApplications } from '@/services/tournament-teams/queries';
 import type { Application } from '@/types/tournament-teams';
 
 interface Team {

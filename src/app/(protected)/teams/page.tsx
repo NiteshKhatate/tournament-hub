@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getTeams } from '@/services/teams';
+import { getTeams } from '@/services/teams/queries';
 import Button from '@/components/common/Button';
 import TeamsTable from '@/components/teams/TeamsTable';
 

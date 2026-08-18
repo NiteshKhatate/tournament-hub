@@ -6,7 +6,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import Input from '@/components/common/Input';
 import Button from '@/components/common/Button';
-import { createOrganiser, updateOrganiser } from '@/app/(protected)/organisers/actions';
+import { createOrganiser, updateOrganiser } from '@/services/organisers/mutations';
 
 interface OrganiserFormProps {
   organiser?: {
