@@ -1,34 +1,10 @@
 import Link from 'next/link';
-import { getTournaments, getTournamentCriteria } from '@/services/tournaments';
+import { getTournaments, getTournamentCriteria } from '@/services/trounaments/queries';
+import { getTournamentGroupsMap } from '@/services/groups/queries';
 import Button from '@/components/common/Button';
-import DeleteTournamentButton from '@/components/tournaments/DeleteTournamentButton';
-import CriteriaButton from '@/components/tournaments/CriteriaButton';
+import TournamentsTable from '@/components/tournaments/TournamentsTable';
 
 const PAGE_SIZE = 10;
-
-interface Tournament {
-  id: number;
-  name: string;
-  organisers: { name: string };
-  sports: { name: string };
-  entry_fee: number;
-  status: string;
-  created: string;
-}
-
-interface Criteria {
-  id: number;
-  tournament_id: number;
-  gender: string | null;
-  type: string;
-  operator: string;
-  value_min: number;
-  value_max: number | null;
-  unit: string | null;
-  max_players_count: number;
-  min_players_count: number;
-  status: 'active' | 'inactive';
-}
 
 export default async function TournamentsPage({
   searchParams,
@@ -40,14 +16,21 @@ export default async function TournamentsPage({
   const { data: tournaments, count } = await getTournaments(page);
   const totalPages = Math.ceil(count / PAGE_SIZE);
 
-  // Fetch criteria for all tournaments on this page
-  const criteriaMap: Record<number, Criteria> = {};
+  const criteriaMap: Record<number, any> = {};
   for (const tournament of tournaments) {
     const { data: criteria } = await getTournamentCriteria(tournament.id);
     if (criteria && criteria.length > 0) {
       criteriaMap[tournament.id] = criteria[0];
     }
   }
+
+  const tournamentIds = tournaments.map((t: any) => t.id);
+  const groupsMap = await getTournamentGroupsMap(tournamentIds);
+
+  const enrichedTournaments = tournaments.map((t: any) => ({
+    ...t,
+    hasGroups: groupsMap.get(t.id) ?? false,
+  }));
 
   return (
     <>
@@ -61,68 +44,8 @@ export default async function TournamentsPage({
         </Button>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-2xl bg-white shadow-md">
-        <table className="w-full text-left">
-          <thead className="border-b border-gray-200 bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Name</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Organiser</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Sport</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Entry Fee</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Status</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Created</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-500">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tournaments.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
-                  No tournaments found
-                </td>
-              </tr>
-            ) : (
-              (tournaments as Tournament[]).map((tournament) => (
-                <tr key={tournament.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-6 py-4 text-app-text">{tournament.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{tournament.organisers.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{tournament.sports.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">₹{tournament.entry_fee}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        tournament.status === 'active'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-500'
-                      }`}
-                    >
-                      {tournament.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(tournament.created).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <CriteriaButton
-                        tournamentId={tournament.id}
-                        criteria={criteriaMap[tournament.id]}
-                      />
-                      <Button
-                        href={`/tournaments/edit/${tournament.id}`}
-                        variant="secondary"
-                        className="!px-3 !py-1.5 text-sm"
-                      >
-                        Edit
-                      </Button>
-                      <DeleteTournamentButton id={tournament.id} />
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className="mt-8">
+        <TournamentsTable tournaments={enrichedTournaments} criteriaMap={criteriaMap} />
       </div>
 
       {totalPages > 1 && (
