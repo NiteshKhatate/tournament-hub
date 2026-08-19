@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { getTournamentById } from '@/services/tournaments';
+import { getTournamentById } from '@/services/trounaments/queries';
 import TournamentForm from '@/components/tournaments/TournamentForm';
 
 export default async function EditTournamentPage({

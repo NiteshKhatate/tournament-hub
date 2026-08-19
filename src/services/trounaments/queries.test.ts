@@ -1,4 +1,4 @@
-import { getTournamentCriteria } from './tournaments';
+import { getTournamentCriteria } from './queries';
 import { supabase } from '@/lib/supabase';
 
 jest.mock('@/lib/supabase', () => ({
