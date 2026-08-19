@@ -19,9 +19,23 @@ interface Tournament {
   hasGroups: boolean;
 }
 
+interface Criteria {
+  id: number;
+  tournament_id: number;
+  gender: string | null;
+  type: string;
+  operator: string;
+  value_min: number;
+  value_max: number | null;
+  unit: string | null;
+  max_players_count: number;
+  min_players_count: number;
+  status: 'active' | 'inactive';
+}
+
 interface TournamentsTableProps {
   tournaments: Tournament[];
-  criteriaMap: Record<number, any>;
+  criteriaMap: Record<number, Criteria>;
 }
 
 export default function TournamentsTable({ tournaments, criteriaMap }: TournamentsTableProps) {

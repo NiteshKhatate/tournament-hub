@@ -6,6 +6,30 @@ import TournamentsTable from '@/components/tournaments/TournamentsTable';
 
 const PAGE_SIZE = 10;
 
+interface Tournament {
+  id: number;
+  name: string;
+  organisers: { name: string };
+  sports: { name: string };
+  entry_fee: number;
+  status: string;
+  created: string;
+}
+
+interface Criteria {
+  id: number;
+  tournament_id: number;
+  gender: string | null;
+  type: string;
+  operator: string;
+  value_min: number;
+  value_max: number | null;
+  unit: string | null;
+  max_players_count: number;
+  min_players_count: number;
+  status: 'active' | 'inactive';
+}
+
 export default async function TournamentsPage({
   searchParams,
 }: {
@@ -16,18 +40,18 @@ export default async function TournamentsPage({
   const { data: tournaments, count } = await getTournaments(page);
   const totalPages = Math.ceil(count / PAGE_SIZE);
 
-  const criteriaMap: Record<number, any> = {};
-  for (const tournament of tournaments) {
+  const criteriaMap: Record<number, Criteria> = {};
+  for (const tournament of tournaments as Tournament[]) {
     const { data: criteria } = await getTournamentCriteria(tournament.id);
     if (criteria && criteria.length > 0) {
       criteriaMap[tournament.id] = criteria[0];
     }
   }
 
-  const tournamentIds = tournaments.map((t: any) => t.id);
+  const tournamentIds = (tournaments as Tournament[]).map((t) => t.id);
   const groupsMap = await getTournamentGroupsMap(tournamentIds);
 
-  const enrichedTournaments = tournaments.map((t: any) => ({
+  const enrichedTournaments = (tournaments as Tournament[]).map((t) => ({
     ...t,
     hasGroups: groupsMap.get(t.id) ?? false,
   }));
