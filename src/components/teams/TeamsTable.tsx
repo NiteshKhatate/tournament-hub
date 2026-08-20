@@ -4,8 +4,12 @@ import { useState } from 'react';
 import Button from '@/components/common/Button';
 import DeleteTeamButton from '@/components/teams/DeleteTeamButton';
 import ViewApplicationsModal from '@/components/teams/ViewApplicationsModal';
+import AddPlayersModal from '@/components/teams/AddPlayersModal';
+import ViewPlayersModal from '@/components/teams/ViewPlayersModal';
 import { getTeamApplications } from '@/services/tournament-teams/queries';
+import { getTeamPlayers } from '@/services/team-players/queries';
 import type { Application } from '@/types/tournament-teams';
+import type { TeamPlayer } from '@/services/team-players/queries';
 
 interface Team {
   id: number;
@@ -25,19 +29,49 @@ interface TeamsTableProps {
 }
 
 export default function TeamsTable({ teams }: TeamsTableProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalLoading, setModalLoading] = useState(false);
+  // View Applications modal state
+  const [isAppsModalOpen, setIsAppsModalOpen] = useState(false);
+  const [appsModalLoading, setAppsModalLoading] = useState(false);
   const [selectedTeamName, setSelectedTeamName] = useState('');
   const [applications, setApplications] = useState<Application[]>([]);
 
+  // Add Players modal state
+  const [isAddPlayersModalOpen, setIsAddPlayersModalOpen] = useState(false);
+  const [selectedTeamForPlayers, setSelectedTeamForPlayers] = useState<{
+    id: number;
+    name: string;
+    sportId: number;
+  } | null>(null);
+
+  // View Players modal state
+  const [isViewPlayersModalOpen, setIsViewPlayersModalOpen] = useState(false);
+  const [viewPlayersModalLoading, setViewPlayersModalLoading] = useState(false);
+  const [selectedTeamNameForView, setSelectedTeamNameForView] = useState('');
+  const [teamPlayers, setTeamPlayers] = useState<TeamPlayer[]>([]);
+
   const handleViewClick = async (teamId: number, teamName: string) => {
     setSelectedTeamName(teamName);
-    setModalLoading(true);
-    setIsModalOpen(true);
+    setAppsModalLoading(true);
+    setIsAppsModalOpen(true);
 
     const { data } = await getTeamApplications(teamId);
-    setApplications(data as Application[]);
-    setModalLoading(false);
+    setApplications(data);
+    setAppsModalLoading(false);
+  };
+
+  const handleAddPlayersClick = (teamId: number, teamName: string, sportId: number) => {
+    setSelectedTeamForPlayers({ id: teamId, name: teamName, sportId });
+    setIsAddPlayersModalOpen(true);
+  };
+
+  const handleViewPlayersClick = async (teamId: number, teamName: string) => {
+    setSelectedTeamNameForView(teamName);
+    setViewPlayersModalLoading(true);
+    setIsViewPlayersModalOpen(true);
+
+    const { data } = await getTeamPlayers(teamId);
+    setTeamPlayers(data);
+    setViewPlayersModalLoading(false);
   };
 
   return (
@@ -86,7 +120,7 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
                     {new Date(team.created).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                       {team.hasApplications && (
                         <Button
                           variant="secondary"
@@ -96,6 +130,20 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
                           View
                         </Button>
                       )}
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleViewPlayersClick(team.id, team.name)}
+                        className="!px-3 !py-1.5 text-sm"
+                      >
+                        View Players
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleAddPlayersClick(team.id, team.name, team.sport_id)}
+                        className="!px-3 !py-1.5 text-sm"
+                      >
+                        Add Players
+                      </Button>
                       <Button
                         href={`/teams/apply/${team.id}`}
                         variant="secondary"
@@ -123,9 +171,31 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
       <ViewApplicationsModal
         teamName={selectedTeamName}
         applications={applications}
-        loading={modalLoading}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        loading={appsModalLoading}
+        isOpen={isAppsModalOpen}
+        onClose={() => setIsAppsModalOpen(false)}
+      />
+
+      <AddPlayersModal
+        teamId={selectedTeamForPlayers?.id ?? null}
+        teamName={selectedTeamForPlayers?.name ?? ''}
+        sportId={selectedTeamForPlayers?.sportId ?? null}
+        isOpen={isAddPlayersModalOpen}
+        onClose={() => setIsAddPlayersModalOpen(false)}
+        onSuccess={() => {
+          // If this team's roster is currently open in the View Players modal, refresh it
+          if (isViewPlayersModalOpen && selectedTeamForPlayers) {
+            handleViewPlayersClick(selectedTeamForPlayers.id, selectedTeamForPlayers.name);
+          }
+        }}
+      />
+
+      <ViewPlayersModal
+        teamName={selectedTeamNameForView}
+        players={teamPlayers}
+        loading={viewPlayersModalLoading}
+        isOpen={isViewPlayersModalOpen}
+        onClose={() => setIsViewPlayersModalOpen(false)}
       />
     </>
   );
