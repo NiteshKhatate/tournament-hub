@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
   { label: 'Organisers', href: '/organisers' },
   { label: 'Tournaments', href: '/tournaments' },
   { label: 'Teams', href: '/teams' },
+  { label: 'Players', href: '/players' },
 ];
 
 export default function SideNav() {
