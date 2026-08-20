@@ -37,7 +37,7 @@ export default function AddPlayersModal({
       setError('');
       setSelectedIds(new Set());
 
-      const { data } = await getAvailablePlayersForTeam(teamId, sportId);
+      const { data } = await getAvailablePlayersForTeam(sportId);
       setPlayers(data);
       setLoading(false);
     };

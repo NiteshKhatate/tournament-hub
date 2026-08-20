@@ -8,7 +8,6 @@ export interface AvailablePlayer {
 }
 
 export async function getAvailablePlayersForTeam(
-  teamId: number,
   sportId: number
 ): Promise<{ data: AvailablePlayer[]; error: unknown }> {
   // Get all players who already have an ACTIVE team_players record,
